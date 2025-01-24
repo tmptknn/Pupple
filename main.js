@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+//import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
@@ -9,6 +10,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import {BubbleShader} from './src/bubbleShader.js';
 import { Vector2 } from 'three';
+import { atan2, cross, rotate } from 'three/tsl';
 // Make a new scene
 let scene = new THREE.Scene();
 // Set background color of the scene to gray
@@ -16,7 +18,7 @@ scene.background = new THREE.Color(0x505050);
 
 // Make a camera. note that far is set to 100, which is better for realworld sized environments
 let camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 1.6, 3);
+camera.position.set(0, 0, 0.0001);
 scene.add(camera);
 
 // Add some lights
@@ -64,8 +66,13 @@ document.body.appendChild(VRButton.createButton(renderer));
 //    import { ARButton } from 'https://unpkg.com/three/examples/jsm/webxr/ARButton.js';
 // then create the button
 //  document.body.appendChild(ARButton.createButton(renderer));
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.autoRotate = true;
+//const controls = new OrbitControls(camera, renderer.domElement);
+//controls.autoRotate = true;
+let controls = new FlyControls( camera, renderer.domElement );
+controls.movementSpeed = 100;
+controls.rollSpeed = Math.PI / 24;
+controls.autoForward = false;
+controls.dragToLook = true;
 const composer = new EffectComposer( renderer );
 // Handle browser resize
 const renderPass = new RenderPass( scene, camera );
@@ -94,8 +101,22 @@ function render(time) {
     // Draw everything
     //composer.
     //tuniform.iTime.value = time/1000;
+    controls.update(0.01)
+    bubblePass.uniforms.uFov.value = camera.fov/2.0;
+    let dirFront = new THREE.Vector3(0,0,1);
+    let dirUp = new THREE.Vector3(0,1,0);
+    let dirLeft = new THREE.Vector3(1,0,0);
+    dirFront = camera.getWorldDirection(dirFront);
+
+    dirUp = dirUp.applyQuaternion( camera.quaternion );
+    dirLeft =dirLeft.applyQuaternion( camera.quaternion );
+    console.log(dirFront, dirUp, dirLeft);
+    bubblePass.uniforms.uFront.value = dirFront;
+    bubblePass.uniforms.uUp.value = dirUp;
+    bubblePass.uniforms.uLeft.value = dirLeft;
+    bubblePass.uniforms.uPos.value = camera.position;
     bubblePass.uniforms.iTime.value = time/1000;
-    bubblePass.uniforms.iResolution.value=new Vector2( 1.,1.);
+    //bubblePass.uniforms.iResolution.value=new Vector2( 1.,1.);
     //renderer.render(scene, camera);
     composer.render();
     

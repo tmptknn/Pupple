@@ -5,7 +5,14 @@ const BubbleShader = {
 	name: 'BubbleShader',
 
 	uniforms: {
+        'tDiffuse': { type: 't', value: null },
+        'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
+        'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
+        'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
+        'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
         'iTime':    { type: 'f', value: 0.1 },
+        //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
+        'uFov':     { type: 'f', value: 50.0/180.*Math.PI },
         'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
         'iChannel0':  { type: 't', value: new THREE.TextureLoader().load( '360_0382.pano.jpg') },
         'iChannel1':  { type: 't', value: new THREE.TextureLoader().load( 'randomnoise.png' ) },
@@ -24,7 +31,14 @@ void main()
 
 	fragmentShader: /* glsl */`
 uniform float iTime;
+uniform float uFov;
+uniform vec3 uFront;
+uniform vec3 uUp;
+uniform vec3 uLeft;
+uniform vec3 uPos;
 uniform vec2 iResolution;
+//uniform vec2 uAngle;
+uniform sampler2D tDiffuse;
 uniform sampler2D iChannel0;
 uniform sampler2D iChannel1;
 
@@ -32,7 +46,7 @@ varying vec2 vUv;
 
 
 #define PI 			3.14159265359
-#define FOV 		80.0
+#define FOV 		50.0
 
 
 // borrowed IQs hash
@@ -115,7 +129,8 @@ float rain( vec3 p){
 }
 vec2 worldToSpherical(in vec3 flatCoord)
 {
-    flatCoord.z*=-1.0;
+    flatCoord *= -1.;
+	//flatCoord.y *=  -1.;
     vec3 n = normalize(flatCoord);
  
     float len = sqrt (n.x *n.x + n.y*n.y);
@@ -228,21 +243,21 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
 }
 
 vec4 samplePixel(in vec2 fragCoord){
-    vec2 uv = (2.0*fragCoord.xy - iResolution.xy)/min (iResolution.x, iResolution.y) * tan (radians (FOV)/2.0);
+    vec2 uv = (2.0*fragCoord.xy)/min (iResolution.x, iResolution.y) * tan (radians(uFov/2.));
 
-    float a = iTime*0.1;
-    float p = 0.0;
-	vec3 up = vec3 (0.0, 1.0, 0.0);			// up 
-    vec3 fw = vec3 (sin(a), 0.0, -cos(a));			// forward
-	vec3 lf = cross (up, fw); 					// left
+    //float a = uAngle.x;
+    //float p = uAngle.y;
+	vec3 up = normalize(uUp);//vec3 (0.0, 1.0, 0.0);			// up 
+    vec3 fw = normalize(uFront);//vec3 (sin(a), 0.0, -cos(a));			// forward
+	vec3 lf = normalize(uLeft);//cross (up, fw); 					// left
 	
-	vec3 ro = -fw * 5.0 + vec3 (0.0, 5.0, 0.0); // ray origin
-	vec3 rd = normalize (uv.x * lf + uv.y * up + fw) ; 		// ray direction
+	vec3 ro =  uPos; // ray origin
+	vec3 rd = normalize ((uv.x) * lf + (uv.y) * up + fw) ; 		// ray direction
     
     vec4 march = ray_march(ro,rd, false);
-    if(march.w<0.){
-        march = ray_march(ro+normalize(rd)*-march.w,march.xyz, true);
-    }
+    //if(march.w<0.){
+    //    march = ray_march(ro+normalize(rd)*-march.w,march.xyz, true);
+    //}
     
     return (march.w<30.)?vec4(march.xyz,1.0):skyColor(ro,rd);
 }
