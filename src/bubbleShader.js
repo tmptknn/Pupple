@@ -243,10 +243,7 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
 }
 
 vec4 samplePixel(in vec2 fragCoord){
-    vec2 uv = (2.0*fragCoord.xy)/min (iResolution.x, iResolution.y) * tan (radians(uFov/2.));
-
-    //float a = uAngle.x;
-    //float p = uAngle.y;
+    vec2 uv = ((2.0*fragCoord.xy)/iResolution.yx) * tan (radians(uFov/2.));
 	vec3 up = normalize(uUp);//vec3 (0.0, 1.0, 0.0);			// up 
     vec3 fw = normalize(uFront);//vec3 (sin(a), 0.0, -cos(a));			// forward
 	vec3 lf = normalize(uLeft);//cross (up, fw); 					// left
@@ -275,7 +272,7 @@ vec4 superSamplePixel(in vec2 fragCoord){
 
 void main() {
     vec2 fragCoord = -1.0 + 2.0 *vUv;
-    gl_FragColor = samplePixel(fragCoord);
+    gl_FragColor = samplePixel(fragCoord);//+0.3*texture2D(tDiffuse, vUv);
 }`
 
 };

@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-//import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+//import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
@@ -66,13 +66,14 @@ document.body.appendChild(VRButton.createButton(renderer));
 //    import { ARButton } from 'https://unpkg.com/three/examples/jsm/webxr/ARButton.js';
 // then create the button
 //  document.body.appendChild(ARButton.createButton(renderer));
-//const controls = new OrbitControls(camera, renderer.domElement);
-//controls.autoRotate = true;
-let controls = new FlyControls( camera, renderer.domElement );
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.autoRotate = true;
+/*let controls = new FlyControls( camera, renderer.domElement );
 controls.movementSpeed = 100;
 controls.rollSpeed = Math.PI / 24;
 controls.autoForward = false;
 controls.dragToLook = true;
+*/
 const composer = new EffectComposer( renderer );
 // Handle browser resize
 const renderPass = new RenderPass( scene, camera );
@@ -101,7 +102,7 @@ function render(time) {
     // Draw everything
     //composer.
     //tuniform.iTime.value = time/1000;
-    controls.update(0.01)
+    //controls.update(0.01)
     bubblePass.uniforms.uFov.value = camera.fov/2.0;
     let dirFront = new THREE.Vector3(0,0,1);
     let dirUp = new THREE.Vector3(0,1,0);
@@ -116,7 +117,7 @@ function render(time) {
     bubblePass.uniforms.uLeft.value = dirLeft;
     bubblePass.uniforms.uPos.value = camera.position;
     bubblePass.uniforms.iTime.value = time/1000;
-    //bubblePass.uniforms.iResolution.value=new Vector2( 1.,1.);
+    bubblePass.uniforms.iResolution.value=new Vector2( 1., window.innerHeight/window.innerWidth);
     //renderer.render(scene, camera);
     composer.render();
     
