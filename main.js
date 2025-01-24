@@ -2,6 +2,13 @@ import * as THREE from 'three';
 
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import {BubbleShader} from './src/bubbleShader.js';
+import { Vector2 } from 'three';
 // Make a new scene
 let scene = new THREE.Scene();
 // Set background color of the scene to gray
@@ -31,15 +38,7 @@ equirectangular.magFilter = THREE.LinearFilter;
 equirectangular.minFilter = THREE.LinearMipMapLinearFilter;
 equirectangular.encoding = THREE.sRGBEncoding;
 equirectangular.anisotropy = 16;
-
 scene.background = equirectangular;
-
-// Make a red cube
-/*let cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1,1,1),
-    new THREE.MeshLambertMaterial({color:'red'})
-);
-*/
 
 
 //cube.position.set(0, 1.5, -10);
@@ -67,8 +66,20 @@ document.body.appendChild(VRButton.createButton(renderer));
 //  document.body.appendChild(ARButton.createButton(renderer));
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.autoRotate = true;
-
+const composer = new EffectComposer( renderer );
 // Handle browser resize
+const renderPass = new RenderPass( scene, camera );
+composer.addPass( renderPass );
+
+const glitchPass = new GlitchPass();
+composer.addPass( glitchPass );
+
+const outputPass = new OutputPass();
+composer.addPass( outputPass );
+
+const bubblePass = new ShaderPass( BubbleShader );
+composer.addPass( bubblePass );
+
 window.addEventListener('resize', onWindowResize, false);
 
 function onWindowResize() {
@@ -81,5 +92,11 @@ function render(time) {
     // Rotate the cube
     //cube.rotation.y = time / 1000;
     // Draw everything
-    renderer.render(scene, camera);
+    //composer.
+    //tuniform.iTime.value = time/1000;
+    bubblePass.uniforms.iTime.value = time/1000;
+    bubblePass.uniforms.iResolution.value=new Vector2( 1.,1.);
+    //renderer.render(scene, camera);
+    composer.render();
+    
 }
