@@ -7,7 +7,7 @@ uniform vec3 uPos;
 uniform vec2 iResolution;
 uniform vec4[16] uBubbles;
 //uniform vec2 uAngle;
-uniform sampler2D tDiffuse;
+//uniform sampler2D tDiffuse;
 uniform sampler2D iChannel0;
 uniform sampler2D iChannel1;
 

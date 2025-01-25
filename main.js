@@ -31,8 +31,8 @@ let bubble = new THREE.Mesh(
     new THREE.SphereGeometry(1.0, 32, 32),
     new THREE.MeshLambertMaterial({color:'#CCCCCC', transparent: true, opacity: 0.5})
 );
-const tausta = new THREE.TextureLoader().load( 'tausta.jpg');
-const randomnoise = new THREE.TextureLoader().load( 'randomnoise.png' );
+const tausta = new THREE.TextureLoader().load( 'taustahalf.jpg');
+const randomnoise = new THREE.TextureLoader().load( 'randomnoisehalf.png' );
 const equirectangular = tausta;
 equirectangular.mapping = THREE.EquirectangularReflectionMapping;
 
@@ -45,7 +45,7 @@ scene.background = equirectangular;
 
 const tuniform = {
     'uBubbles': { type: 'vec4', value: null},
-    'tDiffuse': { type: 't', value: null },
+    //'tDiffuse': { type: 't', value: null },
     'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
     'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
     'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
@@ -65,7 +65,7 @@ tuniform.iResolution.value.set(window.innerWidth, window.innerHeight);
 
 const tuniformR = {
     'uBubbles': { type: 'vec4', value: null},
-    'tDiffuse': { type: 't', value: null },
+    //'tDiffuse': { type: 't', value: null },
     'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
     'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
     'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
@@ -85,7 +85,7 @@ tuniformR.iResolution.value.set(window.innerWidth, window.innerHeight);
 
 const tuniformL = {
     'uBubbles': { type: 'v4v', value: null},
-    'tDiffuse': { type: 't', value: null },
+    //'tDiffuse': { type: 't', value: null },
     'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
     'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
     'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
