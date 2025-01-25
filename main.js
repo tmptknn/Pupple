@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 //import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+//import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
@@ -53,7 +53,21 @@ const tuniform = {
         'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
         'iTime':    { type: 'f', value: 0.1 },
         //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
-        'uFov':     { type: 'f', value: 50.0/180.*Math.PI },
+        'uFov':     { type: 'f', value: 50.0 },
+        'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
+        'iChannel0':  { type: 't', value: tausta },
+        'iChannel1':  { type: 't', value: randomnoise },
+    }
+
+    const tuniform2 = {
+        'tDiffuse': { type: 't', value: null },
+        'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
+        'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
+        'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
+        'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
+        'iTime':    { type: 'f', value: 0.1 },
+        //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
+        'uFov':     { type: 'f', value: 50.0 },
         'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
         'iChannel0':  { type: 't', value: tausta },
         'iChannel1':  { type: 't', value: randomnoise },
@@ -77,7 +91,80 @@ await init();
 bubble.position.set(0, 1.5, -10);
 scene.add(bubble);
 
-const geometry = new THREE.PlaneGeometry(camera.near*window.innerWidth/window.innerHeight,camera.near,10,10);
+
+
+/*
+let i = 0;
+let cam = camera;
+let tuniforms = [];
+tuniforms.push( {
+    'tDiffuse': { type: 't', value: null },
+    'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
+    'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
+    'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
+    'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
+    'iTime':    { type: 'f', value: 0.1 },
+    //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
+    'uFov':     { type: 'f', value: 50.0},
+    'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
+    'iChannel0':  { type: 't', value: tausta },
+    'iChannel1':  { type: 't', value: randomnoise },
+})
+tuniforms[0].iChannel0.value.wrapS = tuniform.iChannel0.value.wrapT = THREE.RepeatWrapping;
+tuniforms[0].iChannel1.value.wrapS = tuniform.iChannel1.value.wrapT = THREE.RepeatWrapping;
+
+tuniforms[0].iResolution.value.set(window.innerWidth, window.innerHeight);
+const geometry1 = new THREE.PlaneGeometry(cam.near,cam.near,10,10);
+const material1 = new THREE.ShaderMaterial({
+    uniforms: tuniforms[i],
+    vertexShader: vertexShaderSource,
+    fragmentShader: fragmentShaderSource,            
+    side:THREE.DoubleSide
+});
+const plan = new THREE.Mesh(geometry1, material1);
+plan.layers.enable(1);
+plan.position.set(0,0,-cam.near-0.00001);
+cam.add(plan);
+i = 1;
+tuniforms.push( {
+    'tDiffuse': { type: 't', value: null },
+    'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
+    'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
+    'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
+    'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
+    'iTime':    { type: 'f', value: 0.1 },
+    //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
+    'uFov':     { type: 'f', value: 50.0 },
+    'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
+    'iChannel0':  { type: 't', value: tausta },
+    'iChannel1':  { type: 't', value: randomnoise },
+})
+tuniforms[1].iChannel0.value.wrapS = tuniform.iChannel0.value.wrapT = THREE.RepeatWrapping;
+tuniforms[1].iChannel1.value.wrapS = tuniform.iChannel1.value.wrapT = THREE.RepeatWrapping;
+
+tuniforms[1].iResolution.value.set(window.innerWidth, window.innerHeight);
+const geometry2 = new THREE.PlaneGeometry(cam.near,cam.near,10,10);
+const material2 = new THREE.ShaderMaterial({
+    uniforms: tuniforms[i],
+    vertexShader: vertexShaderSource,
+    fragmentShader: fragmentShaderSource,            
+    side:THREE.DoubleSide
+});
+const plan2 = new THREE.Mesh(geometry2, material2);
+plan2.layers.enable(2);
+plan2.position.set(0,0,-cam.near-0.00001);
+cam.add(plan2);
+*/
+// Make a renderer that fills the screen
+let renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+// Turn on VR support
+renderer.xr.enabled = true;
+const VRCamera = renderer.xr.getCamera();
+console.log(VRCamera);
+
+const geometry = new THREE.PlaneGeometry(VRCamera.near*2,VRCamera.near*2,10,10);
 const material = new THREE.ShaderMaterial({
     uniforms: tuniform,
     vertexShader: vertexShaderSource,
@@ -85,14 +172,32 @@ const material = new THREE.ShaderMaterial({
     side:THREE.DoubleSide
 });
 const plane = new THREE.Mesh(geometry, material);
-plane.position.set(0,0,-camera.near);
-camera.add(plane);
-// Make a renderer that fills the screen
-let renderer = new THREE.WebGLRenderer({antialias: true});
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-// Turn on VR support
-renderer.xr.enabled = true;
+plane.position.set(0,0,-VRCamera.near);
+plane.layers.disable(0);
+plane.layers.enable(1);
+VRCamera.add(plane);
+VRCamera.position.set(0, 0, 0);
+scene.add(VRCamera);
+// Set animation loop
+renderer.setAnimationLoop(render);
+// Add canvas to the page
+document.body.appendChild(renderer.domElement);
+
+
+const geometry2 = new THREE.PlaneGeometry(VRCamera.near*2,VRCamera.near*2,10,10);
+const material2 = new THREE.ShaderMaterial({
+    uniforms: tuniform2,
+    vertexShader: vertexShaderSource,
+    fragmentShader: fragmentShaderSource,            
+    side:THREE.DoubleSide
+});
+const plane2 = new THREE.Mesh(geometry, material);
+plane2.position.set(0.063,0,-VRCamera.near);
+plane2.layers.disable(0);
+plane2.layers.enable(2);
+VRCamera.add(plane2);
+//VRCamera.position.set(0, 0, 0);
+//scene.add(VRCamera);
 // Set animation loop
 renderer.setAnimationLoop(render);
 // Add canvas to the page
@@ -135,39 +240,16 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-let tuniforms = [];
+
 
 function render(time) {
-    if(renderer.xr.isPresenting && tuniforms.length <2 ){    
-        let i = 0;
-            let cam = camera;
-            tuniforms.push( {
-                'tDiffuse': { type: 't', value: null },
-                'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
-                'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
-                'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
-                'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
-                'iTime':    { type: 'f', value: 0.1 },
-                //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
-                'uFov':     { type: 'f', value: 50.0/180.*Math.PI },
-                'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
-                'iChannel0':  { type: 't', value: tausta },
-                'iChannel1':  { type: 't', value: randomnoise },
-            })
-            const geometry = new THREE.PlaneGeometry(cam.near,cam.near,10,10);
-            const material = new THREE.ShaderMaterial({
-                uniforms: tuniforms[i],
-                vertexShader: vertexShaderSource,
-                fragmentShader: fragmentShaderSource,            
-                side:THREE.DoubleSide
-            });
-            const plan = new THREE.Mesh(geometry, material);
-            plan.position.set(0,0,-cam.near);
-            cam.add(plan);
-    }
-    if(renderer.xr.isPresenting){
+    //if(renderer.xr.isPresenting && tuniforms.length <2 ){    
+
+    //}
+    //if(renderer.xr.isPresenting){ 
         //for(let i=0; i<camera.cameras.length; i++){
-            let i=0;
+        /*
+            for(let i =0; i<2; i++){
             let cam = camera;
             let dirFront = new THREE.Vector3(0,0,1);
             let dirUp = new THREE.Vector3(0,1,0);
@@ -184,9 +266,11 @@ function render(time) {
             tuniforms[i].uPos.value = camera.position;
             tuniforms[i].iTime.value = time/1000;
             tuniforms[i].iResolution.value=new Vector2( 1., 1.);
+    }
+            */
         //}
 
-    }else{
+    //}
     // Rotate the cube
     //cube.rotation.y = time / 1000;
     // Draw everything
@@ -197,18 +281,35 @@ function render(time) {
         let dirFront = new THREE.Vector3(0,0,1);
         let dirUp = new THREE.Vector3(0,1,0);
         let dirLeft = new THREE.Vector3(1,0,0);
-        dirFront = camera.getWorldDirection(dirFront);
+        dirFront = VRCamera.getWorldDirection(dirFront);
 
-        dirUp = dirUp.applyQuaternion( camera.quaternion );
-        dirLeft =dirLeft.applyQuaternion( camera.quaternion );
+        dirUp = dirUp.applyQuaternion( VRCamera.quaternion );
+        dirLeft =dirLeft.applyQuaternion( VRCamera.quaternion );
         //console.log(dirFront, dirUp, dirLeft);
-        tuniform.uFov.value = camera.fov/2.0
+        tuniform.uFov.value = VRCamera.fov
         tuniform.uFront.value = dirFront;
         tuniform.uUp.value = dirUp;
         tuniform.uLeft.value = dirLeft;
-        tuniform.uPos.value = camera.position;
+        tuniform.uPos.value = VRCamera.position;
         tuniform.iTime.value = time/1000;
-        tuniform.iResolution.value=new Vector2( 1., window.innerHeight/window.innerWidth);
+        tuniform.iResolution.value=new Vector2( 1., 1);
+
+
+        let dirFront2 = new THREE.Vector3(0,0,1);
+        let dirUp2 = new THREE.Vector3(0,1,0);
+        let dirLeft2 = new THREE.Vector3(1,0,0);
+        dirFront2 = VRCamera.getWorldDirection(dirFront2);
+
+        dirUp2 = dirUp2.applyQuaternion( VRCamera.quaternion );
+        dirLeft2 =dirLeft2.applyQuaternion( VRCamera.quaternion );
+        //console.log(dirFront, dirUp, dirLeft);
+        tuniform2.uFov.value = VRCamera.fov
+        tuniform2.uFront.value = dirFront2;
+        tuniform2.uUp.value = dirUp2;
+        tuniform2.uLeft.value = dirLeft2;
+        tuniform2.uPos.value = VRCamera.position.clone().add(dirLeft2.multiply(0.063));
+        tuniform2.iTime.value = time/1000;
+        tuniform2.iResolution.value=new Vector2( 1., 1);
 /*
         bubblePass.uniforms.uFov.value = camera.fov/2.0;
         bubblePass.uniforms.uFront.value = dirFront;
@@ -218,7 +319,7 @@ function render(time) {
         bubblePass.uniforms.iTime.value = time/1000;
         bubblePass.uniforms.iResolution.value=new Vector2( 1., window.innerHeight/window.innerWidth);
         */
-    }
+    //console.log(camera);
     renderer.render(scene, camera);
     //composer.render();
     

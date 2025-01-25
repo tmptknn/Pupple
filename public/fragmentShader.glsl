@@ -37,7 +37,7 @@ float sdPlane( vec3 p, vec3 n, float h )
   // n must be normalized
   return dot(p,n) + h;
 }
-float s_rain = 24.;
+float s_rain = 0.3;
 
 float flexTime(){
     return 4.0*(iTime+2.0*sin(iTime*.5));
@@ -51,7 +51,7 @@ vec4 getDrop(in vec3 p){
     vec3 pp = p+rainFactor;
     vec3 cell0 = s*round(pp/s);
     vec3 h =hash33(uvec3(-(-cell0.xyz*10000.-1000000.)));
-    float dropSize =(hash33(uvec3(-(-cell0.zxy*10000.-10000000.)))).z*8.;
+    float dropSize =(hash33(uvec3(-(-cell0.zxy*10000.-10000000.)))).z*0.04;
     return vec4(pp- cell0+((h.xyz-0.5)*(s-dropSize*3.0)),dropSize);
 }
 /*
@@ -147,7 +147,7 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
     float total_distance_traveled = 0.0;
     const int NUMBER_OF_STEPS = 128;
     const float MINIMUM_HIT_DISTANCE = 0.001;
-    const float MAXIMUM_TRACE_DISTANCE = 10.0;
+    const float MAXIMUM_TRACE_DISTANCE = 4.0;
     float watereffect = ignore_water?0.25:0.;
     vec3 ro_reflected = vec3(0);
     float total_distance_traveled_reflected = 0.0;
@@ -192,14 +192,14 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
         }
 
         if ((total_distance_traveled > MAXIMUM_TRACE_DISTANCE ||
-            current_position.z>30.0 ||
-            current_position.z<-30.0 ||
-            current_position.x>30.0 ||
-            current_position.x<-30.0)&&(total_distance_traveled_reflected > MAXIMUM_TRACE_DISTANCE ||
-            current_position.z>30.0 ||
-            current_position.z<-30.0 ||
-            current_position.x>30.0 ||
-            current_position.x<-30.0))
+            current_position.z>3.0 ||
+            current_position.z<-3.0 ||
+            current_position.x>3.0 ||
+            current_position.x<-3.0)&&(total_distance_traveled_reflected > MAXIMUM_TRACE_DISTANCE ||
+            current_position.z>3.0 ||
+            current_position.z<-3.0 ||
+            current_position.x>3.0 ||
+            current_position.x<-3.0))
             {
                 break;
             }
