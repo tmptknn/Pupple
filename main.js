@@ -81,7 +81,7 @@ const tuniformR = {
 tuniformR.iChannel0.value.wrapS = tuniformR.iChannel0.value.wrapT = THREE.RepeatWrapping;
 tuniformR.iChannel1.value.wrapS = tuniformR.iChannel1.value.wrapT = THREE.RepeatWrapping;
 
-tuniformR.iResolution.value.set(window.innerWidth, window.innerHeight);
+//tuniformR.iResolution.value.set(window.innerWidth, window.innerHeight);
 
 const tuniformL = {
     'uBubbles': { type: 'vec4', value: null},
@@ -101,7 +101,7 @@ const tuniformL = {
 tuniformL.iChannel0.value.wrapS = tuniformL.iChannel0.value.wrapT = THREE.RepeatWrapping;
 tuniformL.iChannel1.value.wrapS = tuniformL.iChannel1.value.wrapT = THREE.RepeatWrapping;
 
-tuniformL.iResolution.value.set(window.innerWidth, window.innerHeight);
+//tuniformL.iResolution.value.set(window.innerWidth, window.innerHeight);
 
 let vertexShaderSource;
 let fragmentShaderSource;
@@ -226,10 +226,7 @@ planeR.layers.disable(0);
 planeR.layers.enable(1);
 VRCamera.add(planeR);
 
-// Set animation loop
-renderer.setAnimationLoop(render);
-// Add canvas to the page
-document.body.appendChild(renderer.domElement);
+
 
 
 const geometryL = new THREE.PlaneGeometry(VRCamera.near*2,VRCamera.near*2,10,10);
@@ -244,6 +241,7 @@ planeL.position.set(0.063,0,-VRCamera.near);
 planeL.layers.disable(0);
 planeL.layers.enable(2);
 VRCamera.add(planeL);
+
 //VRCamera.position.set(0, 0, 0);
 //scene.add(VRCamera);
 // Set animation loop
@@ -362,11 +360,11 @@ function render(time) {
         tuniformL.uFront.value = dirFrontL;
         tuniformL.uUp.value = dirUpL;
         tuniformL.uLeft.value = dirLeftL;
-        tuniformL.uPos.value = VRCamera.position.clone().add(dirLeftL.multiply(0.063));
+        tuniformL.uPos.value = VRCamera.position.clone().add(dirLeftL.clone().multiply(0.063));
         tuniformL.iTime.value = time/1000;
         tuniformL.iResolution.value=new Vector2( 1., 1);
         tuniformL.uBubbles.value = bubbles;
-    }
+    }else{
         let dirFront = new THREE.Vector3(0,0,1);
         let dirUp = new THREE.Vector3(0,1,0);
         let dirLeft = new THREE.Vector3(1,0,0);
@@ -383,7 +381,7 @@ function render(time) {
         tuniform.iTime.value = time/1000;
         tuniform.iResolution.value=new Vector2( 1., window.innerHeight/window.innerWidth);
         tuniform.uBubbles.value = bubbles;
-    
+    }
 /*
         bubblePass.uniforms.uFov.value = camera.fov/2.0;
         bubblePass.uniforms.uFront.value = dirFront;
