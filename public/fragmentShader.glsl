@@ -121,6 +121,10 @@ vec4 bubbleColor(in vec3 ro, in vec3 rd){
     return texture2D(iChannel1, flexTime()*0.005+0.03*(rd.zx+rd.yz+rd.yx));
 }
 
+vec4 groundColor(in vec3 ro ){
+    return texture2D(iChannel1, ro.xz*0.1);
+}
+
 float gates(in vec3 p){
 
     float torus =10000000.; //sdTorus((fan*vec4(p,1.)).xyz, vec2(0.50, 0.05));
@@ -155,7 +159,7 @@ vec2 map_the_world(in vec3 p)
     float gate_0 = gates(p);
     float rain_0= rain(p);
     float fan_0 = fans(p);
-    float floor_0 = sdPlane(p, vec3(0,1,0), 0.0);
+    float floor_0 = sdPlane(p, vec3(0,1,0), 3.0);
     if(gate_0 <rain_0 && gate_0 < fan_0&& gate_0 < floor_0){
         return vec2(4,gate_0);
     }
@@ -163,7 +167,7 @@ vec2 map_the_world(in vec3 p)
         return vec2(3,fan_0);
     }
     if(floor_0 < rain_0){
-        return vec2(1,floor_0);
+        return vec2(5,floor_0);
     }
     return vec2(2,rain_0);
 }
@@ -183,7 +187,7 @@ vec3 calculate_normal(in vec3 p, in bool ignore_water)
 vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
 {
     float total_distance_traveled = 0.0;
-    const int NUMBER_OF_STEPS = 128;
+    const int NUMBER_OF_STEPS = 256;
     const float MINIMUM_HIT_DISTANCE = 0.0001;
     const float MAXIMUM_TRACE_DISTANCE = 10.0;
     float watereffect = ignore_water?0.25:0.;
@@ -252,6 +256,9 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
             }
             return vec4(ambientColor + lambertian * diffuseColor + specular * specularColor, 1.0);
             }
+            if(distance_to_closest.x==5.0){ // draw collision shape
+             return mix(skyColor(ro,rd),vec4(0.2,0.2,0.2, 1.0)*groundColor(current_position), min(1.,2.-length(current_position.xz)/8.0));
+             }
         }
 
 
