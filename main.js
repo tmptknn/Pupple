@@ -117,7 +117,7 @@ bubble.position.set(0, 1.5, -10);
 scene.add(bubble);
 
 const bubbles = [];
-for(let j = 0; j< 64; j++){
+for(let j = 0; j<16; j++){
     bubbles.push(Math.random()*2-1,Math.random()*2-1,Math.random()*2-1,Math.random()*0.2);
 }
 
@@ -209,7 +209,7 @@ camera.add(plane);
 
 
 const VRCamera = renderer.xr.getCamera();
-console.log(VRCamera);
+//console.log(VRCamera);
 VRCamera.position.set(0, 0, 0);
 scene.add(VRCamera);
 
@@ -294,7 +294,7 @@ function render(time) {
     //if(renderer.xr.isPresenting && tuniforms.length <2 ){  
     wind[0]+=  (Math.random()-0.5)*0.0001;
     wind[1]+=  (Math.random()-0.5)*0.0001;
-    for(let i=0; i< 64; i++){
+    for(let i=0; i< 16; i++){
         bubbles[4*i+0] +=(Math.random()-0.5)*0.001+wind[0];
         bubbles[4*i+1] +=(Math.random()-0.5)*0.001;
         bubbles[4*i+2] +=(Math.random()-0.5)*0.001+wind[1];

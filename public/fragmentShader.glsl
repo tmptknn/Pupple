@@ -5,7 +5,7 @@ uniform vec3 uUp;
 uniform vec3 uLeft;
 uniform vec3 uPos;
 uniform vec2 iResolution;
-uniform vec4[64] uBubbles;
+uniform vec4[16] uBubbles;
 //uniform vec2 uAngle;
 uniform sampler2D tDiffuse;
 uniform sampler2D iChannel0;
@@ -101,8 +101,8 @@ float rain( vec3 p){
     vec4 drop = uBubbles[0];
     drop.xyz*=-1.;
     drop.xyz+=p;
-    float m=max(-(length(drop.xyz)-(drop.w-0.00001)),length(drop.xyz)-(drop.w));
-    for(int i=1; i<64; i++){
+    float m=max(-(length(drop.xyz)-(drop.w-0.01)),length(drop.xyz)-(drop.w));
+    for(int i=1; i<16; i++){
         drop = uBubbles[i];
         drop.xyz*=-1.;
         drop.xyz+=p;
@@ -150,7 +150,7 @@ vec2 map_the_world(in vec3 p)
 
 vec3 calculate_normal(in vec3 p, in bool ignore_water)
 {
-    const vec3 small_step = vec3(0.001, 0.0, 0.0);
+    const vec3 small_step = vec3(0.01, 0.0, 0.0);
     float gradient_x = map_the_world(p + small_step.xyy).y - map_the_world(p - small_step.xyy).y;
     float gradient_y = map_the_world(p + small_step.yxy).y - map_the_world(p - small_step.yxy).y;
     float gradient_z = map_the_world(p + small_step.yyx).y - map_the_world(p - small_step.yyx).y;
@@ -162,8 +162,8 @@ vec3 calculate_normal(in vec3 p, in bool ignore_water)
 vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
 {
     float total_distance_traveled = 0.0;
-    const int NUMBER_OF_STEPS = 128;
-    const float MINIMUM_HIT_DISTANCE = 0.001;
+    const int NUMBER_OF_STEPS = 64;
+    const float MINIMUM_HIT_DISTANCE = 0.01;
     const float MAXIMUM_TRACE_DISTANCE = 10.0;
     float watereffect = ignore_water?0.25:0.;
     vec3 ro_reflected = vec3(0);
