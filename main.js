@@ -84,7 +84,7 @@ tuniformR.iChannel1.value.wrapS = tuniformR.iChannel1.value.wrapT = THREE.Repeat
 tuniformR.iResolution.value.set(window.innerWidth, window.innerHeight);
 
 const tuniformL = {
-    'uBubbles': { type: 'v4v', value: null},
+    'uBubbles': { type: 'vec4', value: null},
     //'tDiffuse': { type: 't', value: null },
     'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
     'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
@@ -332,37 +332,37 @@ function render(time) {
     //tuniform.iTime.value = time/1000;
     //controls.update(0.01)
         
-        let dirFront = new THREE.Vector3(0,0,1);
-        let dirUp = new THREE.Vector3(0,1,0);
-        let dirLeft = new THREE.Vector3(1,0,0);
-        dirFront = VRCamera.getWorldDirection(dirFront);
+        let dirFrontR = new THREE.Vector3(0,0,1);
+        let dirUpR = new THREE.Vector3(0,1,0);
+        let dirLeftR = new THREE.Vector3(1,0,0);
+        dirFrontR = VRCamera.getWorldDirection(dirFrontR);
 
-        dirUp = dirUp.applyQuaternion( VRCamera.quaternion );
-        dirLeft =dirLeft.applyQuaternion( VRCamera.quaternion );
+        dirUpR = dirUpR.applyQuaternion( VRCamera.quaternion );
+        dirLeftR =dirLeftR.applyQuaternion( VRCamera.quaternion );
         //console.log(dirFront, dirUp, dirLeft);
         tuniformR.uFov.value = VRCamera.fov
-        tuniformR.uFront.value = dirFront;
-        tuniformR.uUp.value = dirUp;
-        tuniformR.uLeft.value = dirLeft;
+        tuniformR.uFront.value = dirFrontR;
+        tuniformR.uUp.value = dirUpR;
+        tuniformR.uLeft.value = dirLeftR;
         tuniformR.uPos.value = VRCamera.position;
         tuniformR.iTime.value = time/1000;
         tuniformR.iResolution.value=new Vector2( 1., 1);
         tuniformR.uBubbles.value = bubbles;
 
 
-        let dirFront2 = new THREE.Vector3(0,0,1);
-        let dirUp2 = new THREE.Vector3(0,1,0);
-        let dirLeft2 = new THREE.Vector3(1,0,0);
-        dirFront2 = VRCamera.getWorldDirection(dirFront2);
+        let dirFrontL = new THREE.Vector3(0,0,1);
+        let dirUpL = new THREE.Vector3(0,1,0);
+        let dirLeftL = new THREE.Vector3(1,0,0);
+        dirFrontL = VRCamera.getWorldDirection(dirFrontL);
 
-        dirUp2 = dirUp2.applyQuaternion( VRCamera.quaternion );
-        dirLeft2 =dirLeft2.applyQuaternion( VRCamera.quaternion );
+        dirUpL = dirUpL.applyQuaternion( VRCamera.quaternion );
+        dirLeftL =dirLeftL.applyQuaternion( VRCamera.quaternion );
         //console.log(dirFront, dirUp, dirLeft);
         tuniformL.uFov.value = VRCamera.fov
-        tuniformL.uFront.value = dirFront2;
-        tuniformL.uUp.value = dirUp2;
-        tuniformL.uLeft.value = dirLeft2;
-        tuniformL.uPos.value = VRCamera.position.clone().add(dirLeft2.multiply(0.063));
+        tuniformL.uFront.value = dirFrontL;
+        tuniformL.uUp.value = dirUpL;
+        tuniformL.uLeft.value = dirLeftL;
+        tuniformL.uPos.value = VRCamera.position.clone().add(dirLeftL.multiply(0.063));
         tuniformL.iTime.value = time/1000;
         tuniformL.iResolution.value=new Vector2( 1., 1);
         tuniformL.uBubbles.value = bubbles;
