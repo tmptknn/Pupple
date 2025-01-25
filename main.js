@@ -111,7 +111,7 @@ function render(time) {
 
     dirUp = dirUp.applyQuaternion( camera.quaternion );
     dirLeft =dirLeft.applyQuaternion( camera.quaternion );
-    console.log(dirFront, dirUp, dirLeft);
+    //console.log(dirFront, dirUp, dirLeft);
     bubblePass.uniforms.uFront.value = dirFront;
     bubblePass.uniforms.uUp.value = dirUp;
     bubblePass.uniforms.uLeft.value = dirLeft;

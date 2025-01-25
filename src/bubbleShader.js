@@ -224,14 +224,14 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
         }
 
         if ((total_distance_traveled > MAXIMUM_TRACE_DISTANCE ||
-            current_position.z>20.0 ||
-            current_position.z<-20.0 ||
-            current_position.x>20.0 ||
-            current_position.x<-20.0)&&(total_distance_traveled_reflected > MAXIMUM_TRACE_DISTANCE ||
-            current_position.z>20.0 ||
-            current_position.z<-20.0 ||
-            current_position.x>20.0 ||
-            current_position.x<-20.0))
+            current_position.z>30.0 ||
+            current_position.z<-30.0 ||
+            current_position.x>30.0 ||
+            current_position.x<-30.0)&&(total_distance_traveled_reflected > MAXIMUM_TRACE_DISTANCE ||
+            current_position.z>30.0 ||
+            current_position.z<-30.0 ||
+            current_position.x>30.0 ||
+            current_position.x<-30.0))
             {
                 break;
             }
