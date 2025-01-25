@@ -216,6 +216,7 @@ const material_torus = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
 const torus = new THREE.Mesh( geometry_torus, material_torus );
     torus.position.set(x,y,z);
 gates.push(torus);
+
 }
 
 function addToScene(gameObject)
@@ -229,6 +230,7 @@ addGate(0,0,-2, gates);
 addGate(0,0,-3, gates);
 
 gates.forEach(addToScene);
+
 
 const VRCamera = renderer.xr.getCamera();
 //console.log(VRCamera);
@@ -320,6 +322,14 @@ function render(time) {
         bubbles[4*i+1] +=(Math.random()-0.5)*0.001;
         bubbles[4*i+2] +=(Math.random()-0.5)*0.001+wind[1];
     }
+
+    
+    for(let j =0; j< gates.length; j++){
+        let fan0 =gates[j].matrixWorld.invert();
+        for(let i = 0; i<16; i++){
+            fans[16*j+i] = fan0.elements[i];
+        }
+    }
     controls.update(0.01)
     //}
     if(renderer.xr.isPresenting){ 
@@ -406,6 +416,7 @@ function render(time) {
         tuniform.iResolution.value=new Vector2( 1., window.innerHeight/window.innerWidth);
         tuniform.uBubbles.value = bubbles;
         tuniform.uFans.value = fans;
+        tuniform.fanCount.value = gates.length;
     }
 /*
         bubblePass.uniforms.uFov.value = camera.fov/2.0;
