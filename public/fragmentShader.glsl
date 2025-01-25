@@ -5,6 +5,7 @@ uniform vec3 uUp;
 uniform vec3 uLeft;
 uniform vec3 uPos;
 uniform vec2 iResolution;
+uniform vec4[64] uBubbles;
 //uniform vec2 uAngle;
 uniform sampler2D tDiffuse;
 uniform sampler2D iChannel0;
@@ -89,11 +90,27 @@ float calculateDropWaves(in vec3 p){
 }
 */
 
-float rain( vec3 p){
+float rainOld( vec3 p){
     vec4 drop = getDrop(p);
     return max(-(length(drop.xyz)-(drop.w-0.00001)),length(drop.xyz)-(drop.w));
     //return length(drop.xyz)-(drop.w);
 
+}
+
+float rain( vec3 p){
+    vec4 drop = uBubbles[0];
+    drop.xyz*=-1.;
+    drop.xyz+=p;
+    float m=max(-(length(drop.xyz)-(drop.w-0.00001)),length(drop.xyz)-(drop.w));
+    for(int i=1; i<64; i++){
+        drop = uBubbles[i];
+        drop.xyz*=-1.;
+        drop.xyz+=p;
+        m=min(m, max(-(length(drop.xyz)-(drop.w-0.00001)),length(drop.xyz)-(drop.w)));
+    //return length(drop.xyz)-(drop.w);
+    }
+
+    return m;
 }
 vec2 worldToSpherical(in vec3 flatCoord)
 {
@@ -117,7 +134,7 @@ vec4 skyColor(in vec3 ro, in vec3 rd){
 }
 
 vec4 bubbleColor(in vec3 ro, in vec3 rd){
-    return texture2D(iChannel1, flexTime()*0.001+0.002*(rd.zx+rd.yz+rd.yx));
+    return texture2D(iChannel1, flexTime()*0.0003+0.002*(rd.zx+rd.yz+rd.yx));
 }
 
 float water_level = 1.0;
@@ -147,7 +164,7 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
     float total_distance_traveled = 0.0;
     const int NUMBER_OF_STEPS = 128;
     const float MINIMUM_HIT_DISTANCE = 0.001;
-    const float MAXIMUM_TRACE_DISTANCE = 4.0;
+    const float MAXIMUM_TRACE_DISTANCE = 10.0;
     float watereffect = ignore_water?0.25:0.;
     vec3 ro_reflected = vec3(0);
     float total_distance_traveled_reflected = 0.0;
@@ -191,19 +208,7 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
             }
         }
 
-        if ((total_distance_traveled > MAXIMUM_TRACE_DISTANCE ||
-            current_position.z>1.0 ||
-            current_position.z<-1.0 ||
-            current_position.y>1.0 ||
-            current_position.y<-1.0 ||
-            current_position.x>1.0 ||
-            current_position.x<-1.0)||(total_distance_traveled_reflected > MAXIMUM_TRACE_DISTANCE ||
-            current_position_reflected.z>1.0 ||
-            current_position_reflected.z<-1.0 ||
-            current_position_reflected.z>1.0 ||
-            current_position_reflected.z<-1.0 ||
-            current_position_reflected.x>1.0 ||
-            current_position_reflected.x<-1.0))
+        if (total_distance_traveled > MAXIMUM_TRACE_DISTANCE ||total_distance_traveled_reflected > MAXIMUM_TRACE_DISTANCE )
             {
                 break;
             }

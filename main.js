@@ -44,6 +44,7 @@ equirectangular.anisotropy = 16;
 scene.background = equirectangular;
 
 const tuniform = {
+    'uBubbles': { type: 'vec4', value: null},
     'tDiffuse': { type: 't', value: null },
     'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
     'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
@@ -63,37 +64,39 @@ tuniform.iChannel1.value.wrapS = tuniform.iChannel1.value.wrapT = THREE.RepeatWr
 tuniform.iResolution.value.set(window.innerWidth, window.innerHeight);
 
 const tuniformR = {
-        'tDiffuse': { type: 't', value: null },
-        'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
-        'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
-        'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
-        'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
-        'iTime':    { type: 'f', value: 0.1 },
-        //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
-        'uFov':     { type: 'f', value: 50.0 },
-        'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
-        'iChannel0':  { type: 't', value: tausta },
-        'iChannel1':  { type: 't', value: randomnoise },
-    }
+    'uBubbles': { type: 'vec4', value: null},
+    'tDiffuse': { type: 't', value: null },
+    'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
+    'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
+    'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
+    'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
+    'iTime':    { type: 'f', value: 0.1 },
+    //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
+    'uFov':     { type: 'f', value: 50.0 },
+    'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
+    'iChannel0':  { type: 't', value: tausta },
+    'iChannel1':  { type: 't', value: randomnoise },
+}
 
-    tuniformR.iChannel0.value.wrapS = tuniformR.iChannel0.value.wrapT = THREE.RepeatWrapping;
-    tuniformR.iChannel1.value.wrapS = tuniformR.iChannel1.value.wrapT = THREE.RepeatWrapping;
-    
-    tuniformR.iResolution.value.set(window.innerWidth, window.innerHeight);
+tuniformR.iChannel0.value.wrapS = tuniformR.iChannel0.value.wrapT = THREE.RepeatWrapping;
+tuniformR.iChannel1.value.wrapS = tuniformR.iChannel1.value.wrapT = THREE.RepeatWrapping;
 
-    const tuniformL = {
-        'tDiffuse': { type: 't', value: null },
-        'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
-        'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
-        'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
-        'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
-        'iTime':    { type: 'f', value: 0.1 },
-        //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
-        'uFov':     { type: 'f', value: 50.0 },
-        'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
-        'iChannel0':  { type: 't', value: tausta },
-        'iChannel1':  { type: 't', value: randomnoise },
-    }
+tuniformR.iResolution.value.set(window.innerWidth, window.innerHeight);
+
+const tuniformL = {
+    'uBubbles': { type: 'v4v', value: null},
+    'tDiffuse': { type: 't', value: null },
+    'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
+    'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
+    'uLeft':    { type: 'v3', value: new THREE.Vector3(1.0, 0.0, 0.0) },
+    'uPos':     { type: 'v3', value: new THREE.Vector3(0.0, 0.0, 0.0) },
+    'iTime':    { type: 'f', value: 0.1 },
+    //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
+    'uFov':     { type: 'f', value: 50.0 },
+    'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
+    'iChannel0':  { type: 't', value: tausta },
+    'iChannel1':  { type: 't', value: randomnoise },
+}
 
 tuniformL.iChannel0.value.wrapS = tuniformL.iChannel0.value.wrapT = THREE.RepeatWrapping;
 tuniformL.iChannel1.value.wrapS = tuniformL.iChannel1.value.wrapT = THREE.RepeatWrapping;
@@ -113,7 +116,10 @@ await init();
 bubble.position.set(0, 1.5, -10);
 scene.add(bubble);
 
-
+const bubbles = [];
+for(let j = 0; j< 64; j++){
+    bubbles.push(Math.random()*2-1,Math.random()*2-1,Math.random()*2-1,Math.random()*0.2);
+}
 
 /*
 let i = 0;
@@ -282,11 +288,17 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-
+let wind = [0,0];
 
 function render(time) {
-    //if(renderer.xr.isPresenting && tuniforms.length <2 ){    
-
+    //if(renderer.xr.isPresenting && tuniforms.length <2 ){  
+    wind[0]+=  (Math.random()-0.5)*0.0001;
+    wind[1]+=  (Math.random()-0.5)*0.0001;
+    for(let i=0; i< 64; i++){
+        bubbles[4*i+0] +=(Math.random()-0.5)*0.001+wind[0];
+        bubbles[4*i+1] +=(Math.random()-0.5)*0.001;
+        bubbles[4*i+2] +=(Math.random()-0.5)*0.001+wind[1];
+    }
     //}
     if(renderer.xr.isPresenting){ 
         //for(let i=0; i<camera.cameras.length; i++){
@@ -335,6 +347,7 @@ function render(time) {
         tuniformR.uPos.value = VRCamera.position;
         tuniformR.iTime.value = time/1000;
         tuniformR.iResolution.value=new Vector2( 1., 1);
+        tuniformR.uBubbles.value = bubbles;
 
 
         let dirFront2 = new THREE.Vector3(0,0,1);
@@ -352,6 +365,7 @@ function render(time) {
         tuniformL.uPos.value = VRCamera.position.clone().add(dirLeft2.multiply(0.063));
         tuniformL.iTime.value = time/1000;
         tuniformL.iResolution.value=new Vector2( 1., 1);
+        tuniformL.uBubbles.value = bubbles;
     }
         let dirFront = new THREE.Vector3(0,0,1);
         let dirUp = new THREE.Vector3(0,1,0);
@@ -367,7 +381,8 @@ function render(time) {
         tuniform.uLeft.value = dirLeft;
         tuniform.uPos.value = camera.position;
         tuniform.iTime.value = time/1000;
-        tuniform.iResolution.value=new Vector2( 1., 1);
+        tuniform.iResolution.value=new Vector2( 1., window.innerHeight/window.innerWidth);
+        tuniform.uBubbles.value = bubbles;
     
 /*
         bubblePass.uniforms.uFov.value = camera.fov/2.0;
