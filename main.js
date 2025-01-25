@@ -215,7 +215,7 @@ const geometry_torus = new THREE.TorusGeometry( 0.5, 0.05, 16, 100 );
 const material_torus = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
 const torus = new THREE.Mesh( geometry_torus, material_torus );
     torus.position.set(x,y,z);
-    torus.rotation.set(0,rotationY,0);
+torus.rotateY(rotationY);
 gates.push(torus);
 
 }
