@@ -133,8 +133,12 @@ const bubbles = [];
 for(let j = 0; j<16; j++){
     bubbles.push(Math.random()*2-1,Math.random()*2-1,Math.random()*2-1,Math.random()*0.2);
 }
-let fanMs = [16*16];
-let gateMs = [16*16];
+let fanMs = [];
+let gateMs = [];
+for(let i=0; i<16*16; i++){
+    fanMs.push(0);
+    gateMs.push(0);
+}
 /*
 let i = 0;
 let cam = camera;
