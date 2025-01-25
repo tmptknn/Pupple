@@ -32,14 +32,6 @@ light.position.set(1, 1, 1).normalize();
 scene.add(light);
 scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-let bubble = new THREE.Mesh(
-  new THREE.SphereGeometry(1.0, 32, 32),
-  new THREE.MeshLambertMaterial({
-    color: "#CCCCCC",
-    transparent: true,
-    opacity: 0.5,
-  })
-);
 const tausta = new THREE.TextureLoader().load("tausta.jpg");
 const randomnoise = new THREE.TextureLoader().load("randomnoisequarter.png");
 const equirectangular = tausta;
@@ -139,10 +131,6 @@ async function init() {
 }
 
 await init();
-//cube.position.set(0, 1.5, -10);
-//scene.add(cube);
-bubble.position.set(0, 1.5, -10);
-scene.add(bubble);
 
 const bubbles = [];
 for (let j = 0; j < 16; j++) {
@@ -244,9 +232,21 @@ const plane = new THREE.Mesh(geometry, material);
 plane.position.set(0, 0, -camera.near);
 plane.layers.disable(1);
 plane.layers.disable(2);
-plane.layers.enable(0);
-//plane.layers.disable(0);
+//plane.layers.enable(0);
+plane.layers.disable(0);
 camera.add(plane);
+
+function addBubble(x, y, z) {
+  const bubble_geometry = new THREE.SphereGeometry(0.1, 32, 32);
+  const bubble_material = new THREE.MeshLambertMaterial({
+    color: "#CCCCCC",
+    transparent: true,
+    opacity: 0.8,
+  });
+  const bubble = new THREE.Mesh(bubble_geometry, bubble_material);
+  bubble.position.set(x, y, z);
+  soapBubbles.push(bubble);
+}
 
 function addGate(x, y, z, gates, rotationY = 0) {
   const geometry_torus = new THREE.TorusGeometry(0.5, 0.05, 16, 100);
@@ -260,6 +260,10 @@ function addGate(x, y, z, gates, rotationY = 0) {
 function addToScene(gameObject) {
   scene.add(gameObject);
 }
+
+const soapBubbles = [];
+addBubble(0, 0, -1, soapBubbles);
+soapBubbles.forEach(addToScene);
 
 const gates = [];
 addGate(0, 0, -1, gates);
