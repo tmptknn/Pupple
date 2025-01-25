@@ -138,9 +138,9 @@ function onWindowResize() {
 let tuniforms = [];
 
 function render(time) {
-    if(renderer.xr.isPresenting && tuniforms.length == 0){
-        for(let i=0; i<camera.cameras.length; i++){
-            let cam = camera.cameras[i];
+    if(renderer.xr.isPresenting && tuniforms.length <2 ){    
+        let i = 0;
+            let cam = camera;
             tuniforms.push( {
                 'tDiffuse': { type: 't', value: null },
                 'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
@@ -164,12 +164,11 @@ function render(time) {
             const plan = new THREE.Mesh(geometry, material);
             plan.position.set(0,0,-cam.near);
             cam.add(plan);
-        }
     }
     if(renderer.xr.isPresenting){
-        for(let i=0; i<camera.cameras.length; i++){
-            
-            let cam = camera.cameras[i];
+        //for(let i=0; i<camera.cameras.length; i++){
+            let i=0;
+            let cam = camera;
             let dirFront = new THREE.Vector3(0,0,1);
             let dirUp = new THREE.Vector3(0,1,0);
             let dirLeft = new THREE.Vector3(1,0,0);
@@ -185,7 +184,7 @@ function render(time) {
             tuniforms[i].uPos.value = camera.position;
             tuniforms[i].iTime.value = time/1000;
             tuniforms[i].iResolution.value=new Vector2( 1., 1.);
-        }
+        //}
 
     }else{
     // Rotate the cube
