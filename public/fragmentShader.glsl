@@ -155,11 +155,15 @@ vec2 map_the_world(in vec3 p)
     float gate_0 = gates(p);
     float rain_0= rain(p);
     float fan_0 = fans(p);
-    if(gate_0 <rain_0 && gate_0 < fan_0){
+    float floor_0 = sdPlane(p, vec3(0,1,0), 0.0);
+    if(gate_0 <rain_0 && gate_0 < fan_0&& gate_0 < floor_0){
         return vec2(4,gate_0);
     }
-    if(fan_0 <rain_0){
+    if(fan_0 <rain_0 && fan_0 <floor_0){
         return vec2(3,fan_0);
+    }
+    if(floor_0 < rain_0){
+        return vec2(1,floor_0);
     }
     return vec2(2,rain_0);
 }

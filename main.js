@@ -344,6 +344,12 @@ function render(time) {
             gateMs[16*j+i] = gate0.elements[i];
         }
     }
+    for(let j =0; j< fans.length; j++){
+        let fan0 =fans[j].matrixWorld.invert();
+        for(let i = 0; i<16; i++){
+            fanMs[16*j+i] = fan0.elements[i];
+        }
+    }
     controls.update(0.01)
     //}
     if(renderer.xr.isPresenting){ 
@@ -433,7 +439,7 @@ function render(time) {
         tuniform.uFans.value = fanMs;
         tuniform.uGates.value = gateMs;
         tuniform.gateCount.value = gates.length;
-        tuniform.fanCount.value = fans.length;
+        //tuniform.fanCount.value = fans.length;
         //dirUp.cross(new THREE.Vector3(0,1,0));
         if(dirUp.y <0.9){
             //camera.rotateOnAxis((dirUp.cross(new THREE.Vector3(0,1,0))).normalize(),0.01);
