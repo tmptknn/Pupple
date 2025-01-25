@@ -44,7 +44,10 @@ equirectangular.anisotropy = 16;
 scene.background = equirectangular;
 
 const tuniform = {
+    'fanCount': { type: 'int', value: 0},
+    'uFans': { type: 'mat4', value: null},
     'uBubbles': { type: 'vec4', value: null},
+
     //'tDiffuse': { type: 't', value: null },
     'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
     'uUp':      { type: 'v3', value: new THREE.Vector3(0.0, 1.0, 0.0) },
@@ -120,7 +123,7 @@ const bubbles = [];
 for(let j = 0; j<16; j++){
     bubbles.push(Math.random()*2-1,Math.random()*2-1,Math.random()*2-1,Math.random()*0.2);
 }
-
+let fans = [16*16];
 /*
 let i = 0;
 let cam = camera;
@@ -203,6 +206,7 @@ plane.position.set(0,0,-camera.near);
 plane.layers.disable(1);
 plane.layers.disable(2);
 plane.layers.enable(0);
+//plane.layers.disable(0);
 camera.add(plane);
 
 function addGate(x, y, z, gates)
@@ -401,6 +405,7 @@ function render(time) {
         tuniform.iTime.value = time/1000;
         tuniform.iResolution.value=new Vector2( 1., window.innerHeight/window.innerWidth);
         tuniform.uBubbles.value = bubbles;
+        tuniform.uFans.value = fans;
     }
 /*
         bubblePass.uniforms.uFov.value = camera.fov/2.0;

@@ -6,6 +6,8 @@ uniform vec3 uLeft;
 uniform vec3 uPos;
 uniform vec2 iResolution;
 uniform vec4[16] uBubbles;
+uniform mat4[16] uFans;
+uniform int  fanCount;
 //uniform vec2 uAngle;
 //uniform sampler2D tDiffuse;
 uniform sampler2D iChannel0;
@@ -33,6 +35,12 @@ vec3 hash33( uvec3 x )
     return vec3(x)*(1.0/float(0xffffffffU));
 }
 
+float sdTorus( vec3 p, vec2 t )
+{
+  vec2 q = vec2(length(p.xy)-t.x,p.z);
+  return length(q)-t.y;
+}
+
 float sdPlane( vec3 p, vec3 n, float h )
 {
   // n must be normalized
@@ -55,47 +63,6 @@ vec4 getDrop(in vec3 p){
     float dropSize =(hash33(uvec3(-(-cell0.zxy*10000.-10000000.)))).z*0.2;
     return vec4(pp- cell0+((h.xyz-0.5)*(s-dropSize*3.0)),dropSize);
 }
-/*
-float waves(in vec3 p){
-    float sum =0.;
-    for(int i=0; i<2; i++){
-        vec3 h2 = hash33(uvec3(7+i));
-        vec3 pp= p*2.0;
-        float t = flexTime()*3.;
-        vec3 h = hash33(uvec3(3+i))*0.5+0.5;
-        float a = h2.x*PI*2.;
-        sum += sin((h.z+t+pp.x)*h2.y*sin(a)+(pp.z+h.x+t)*cos(a)*h2.y+t*h.y);
-    }
-    return sum;
-}
-
-float calculateDropWaves(in vec3 p){
-    float sum = 0.;
-    for(int i=-1; i<2;i++){
-        for(int j=-1; j<2; j++){
-            for(int k=-1; k<1; k++){     
-                vec4 drop =getDrop(p+vec3(i,k,j)*vec3(s_rain));
-                drop.xyz-=vec3(i,k,j)*vec3(s_rain);
-                if(drop.y > 0.0){
-                    float rippleSize =s_rain;
-                    float dist =max(drop.y-length(drop.xz),0.0);
-                    float size =min(dist, rippleSize)/rippleSize;
-                    float factor = min(max(0.,(rippleSize-drop.y))/rippleSize,1.);
-                    sum+=factor*factor*(size*size)*0.5*sin(5.0*dist);
-                }
-            }
-        }
-    }
-    return sum+waves(p)*0.01;
-}
-*/
-
-float rainOld( vec3 p){
-    vec4 drop = getDrop(p);
-    return max(-(length(drop.xyz)-(drop.w-0.00001)),length(drop.xyz)-(drop.w));
-    //return length(drop.xyz)-(drop.w);
-
-}
 
 float rain( vec3 p){
     vec4 drop = uBubbles[0];
@@ -107,7 +74,6 @@ float rain( vec3 p){
         drop.xyz*=-1.;
         drop.xyz+=p;
         m=min(m, max(-(length(drop.xyz)-(drop.w-0.00001)),length(drop.xyz)-(drop.w)));
-    //return length(drop.xyz)-(drop.w);
     }
 
     return m;
@@ -115,16 +81,12 @@ float rain( vec3 p){
 vec2 worldToSpherical(in vec3 flatCoord)
 {
     flatCoord *= -1.;
-	//flatCoord.y *=  -1.;
     vec3 n = normalize(flatCoord);
- 
     float len = sqrt (n.x *n.x + n.y*n.y);
- 
     float s = acos( n.x / len);
     if (n.y < 0.) {
         s = 2.0 * PI - s;
     }
- 
     s = s / (2.0 * PI);
     return vec2(s , ((asin(n.z) * -2.0 / PI ) + 1.0) * 0.5);
 }
@@ -134,17 +96,36 @@ vec4 skyColor(in vec3 ro, in vec3 rd){
 }
 
 vec4 bubbleColor(in vec3 ro, in vec3 rd){
-    return texture2D(iChannel1, flexTime()*0.0003+0.002*(rd.zx+rd.yz+rd.yx));
+    return texture2D(iChannel1, flexTime()*0.005+0.03*(rd.zx+rd.yz+rd.yx));
 }
 
-float water_level = 1.0;
+float fans(in vec3 p){
+    mat4 fan = uFans[0];
+    //fan.xyz*=-1.;
+    //fan.xyz+=p;
+    float torus =10000000.; //sdTorus((fan*vec4(p,1.)).xyz, vec2(0.50, 0.05));
+    for(int i=0; i<16; i++){
+        if(fanCount<=i){
+            break;
+        }
+        fan = uFans[i];
+        //fan.xyz*=-1.;
+        //fan.xyz+=p;
+        torus=min(torus, sdTorus((fan*vec4(p,1.)).xyz, vec2(0.50, 0.05)));
+    }
+
+    return torus;
+}
 
 vec2 map_the_world(in vec3 p)
 {
-    //float water_0 = p.y>0.5?1e20:sdPlane(p, vec3(0,1,0), water_level)+2.5*calculateDropWaves(p);
-    //float rain_0 = rain(p);
-    //return (rain_0<water_0)?vec2(2,rain_0):vec2(1,water_0);
-    return vec2(2,rain(p));
+    
+    float fan_0 = fans(p);
+    float rain_0= rain(p);
+    if(fan_0 <rain_0){
+        return vec2(4,fan_0);
+    }
+    return vec2(2,rain_0);
 }
 
 
@@ -206,7 +187,33 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
                 ro=ro+rd*total_distance_traveled;
                 rd = (1./1.4)*(cross(normal,cross(-normal,rd))-normal*sqrt(1.-pow(1./1.4,2.0)*dot(cross(normal,rd),cross(normal,rd))));
             }
+            if(distance_to_closest.x==4.0 ){ // draw collision shape
+                vec3 ambientColor = vec3(0.0, 0.0, 0.0);
+            vec3 diffuseColor = vec3(0.118, 0.11, 0.875);
+            vec3 specularColor = vec3(1.0, 1.0, 1.0);
+            float specular = 0.0;
+            const float shininess = 30.0;
+            float lambertian = max(dot(normal, light_position), 0.0);
+            // If the surface is not receiving any light
+            // we can skip the specular component calculation
+            if(lambertian > 0.0) {
+                // Phong
+                vec3 reflection = normalize(2.0*(dot(normal, light_position)) * normal - light_position);
+                float k = dot(reflection, ro); 
+                specular = pow(k, shininess);
+                
+                // Blinn-Phong approximation
+                // This is an approximation to pure Phong shading that it's faster to calculate
+                // vec3 halfVec = normalize(light + camera);
+                // mediump float halfVecDot = dot(halfVec,normal);
+                // if(halfVecDot > 0.0) {
+                // 	specular = max(0.0,pow(halfVecDot, shininess));
+                //}
+            }
+            return vec4(ambientColor + lambertian * diffuseColor + specular * specularColor, 1.0);
+            }
         }
+
 
         if (total_distance_traveled > MAXIMUM_TRACE_DISTANCE ||total_distance_traveled_reflected > MAXIMUM_TRACE_DISTANCE )
             {
@@ -223,21 +230,15 @@ vec4 samplePixel(in vec2 fragCoord){
     vec2 uv = ((2.0*fragCoord.xy)/iResolution.yx) * tan (radians(uFov/2.));
 	vec3 up = normalize(uUp);//vec3 (0.0, 1.0, 0.0);			// up 
     vec3 fw = normalize(uFront);//vec3 (sin(a), 0.0, -cos(a));			// forward
-	vec3 lf = normalize(uLeft);//cross (up, fw); 					// left
-	
+	vec3 lf = normalize(uLeft);//cross (up, fw); 					// left	
 	vec3 ro =  uPos; // ray origin
 	vec3 rd = normalize ((uv.x) * lf + (uv.y) * up + fw) ; 		// ray direction
-    
     vec4 march = ray_march(ro,rd, false);
-    //if(march.w<0.){
-    //    march = ray_march(ro+normalize(rd)*-march.w,march.xyz, true);
-    //}
-    
     return (march.w<30.)?vec4(march.xyz,1.0):skyColor(ro,rd);
 }
 
 vec4 superSamplePixel(in vec2 fragCoord){
-    vec2 step = vec2(.5);
+    vec2 step = vec2(0.0001);
     vec4 sum=vec4(0);
     for(int i=0;i<2;i++){
         for(int j=0; j<2;j++){
