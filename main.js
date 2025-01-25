@@ -32,7 +32,7 @@ let bubble = new THREE.Mesh(
     new THREE.MeshLambertMaterial({color:'#CCCCCC', transparent: true, opacity: 0.5})
 );
 
-const equirectangular = new THREE.TextureLoader().load('360_0382.pano.jpg');
+const equirectangular = new THREE.TextureLoader().load('tausta.jpg');
 equirectangular.mapping = THREE.EquirectangularReflectionMapping;
 
 // Things Github Copilot suggested, removing it does not change colors so I thing it's not the problem

@@ -14,7 +14,7 @@ const BubbleShader = {
         //'uAngle':   { type: 'v2', value: new THREE.Vector2(0.0, 0.0) },
         'uFov':     { type: 'f', value: 50.0/180.*Math.PI },
         'iResolution': { type: 'v2', value: new THREE.Vector2(1.,1.) },
-        'iChannel0':  { type: 't', value: new THREE.TextureLoader().load( '360_0382.pano.jpg') },
+        'iChannel0':  { type: 't', value: new THREE.TextureLoader().load( 'tausta.jpg') },
         'iChannel1':  { type: 't', value: new THREE.TextureLoader().load( 'randomnoise.png' ) },
 	},
 
