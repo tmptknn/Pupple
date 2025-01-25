@@ -266,10 +266,10 @@ addBubble(0, 0, -1, soapBubbles);
 soapBubbles.forEach(addToScene);
 
 const gates = [];
-addGate(0, 0, -1, gates);
-addGate(0, 0, -2, gates);
-addGate(0, 0, -3, gates);
-addGate(0, 0, -4, gates, Math.PI / 5);
+addGate(0, 0, -1.5, gates);
+addGate(1, 0.5, -3, gates, -Math.PI / 5);
+addGate(-1, 1, -5, gates, Math.PI / 5);
+addGate(0, 0.5, -8, gates);
 
 gates.forEach(addToScene);
 
