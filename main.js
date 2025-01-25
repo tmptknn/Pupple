@@ -31,8 +31,8 @@ let bubble = new THREE.Mesh(
     new THREE.SphereGeometry(1.0, 32, 32),
     new THREE.MeshLambertMaterial({color:'#CCCCCC', transparent: true, opacity: 0.5})
 );
-const tausta = new THREE.TextureLoader().load( 'taustahalf.png');
-const randomnoise = new THREE.TextureLoader().load( 'randomnoisehalf.png' );
+const tausta = new THREE.TextureLoader().load( 'taustaquarter.png');
+const randomnoise = new THREE.TextureLoader().load( 'randomnoisequarter.png' );
 const equirectangular = tausta;
 equirectangular.mapping = THREE.EquirectangularReflectionMapping;
 
