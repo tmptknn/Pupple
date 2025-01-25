@@ -20,7 +20,7 @@ scene.background = new THREE.Color(0x505050);
 let camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.01, 100);
 camera.position.set(0, 0, 0.0001);
 scene.add(camera);
-
+let fans = [];
 // Add some lights
 var light = new THREE.DirectionalLight(0xffffff,0.5);
 light.position.set(1, 1, 1).normalize();
@@ -45,7 +45,9 @@ scene.background = equirectangular;
 
 const tuniform = {
     'fanCount': { type: 'int', value: 0},
+    'gateCount': { type: 'int', value: 0},
     'uFans': { type: 'mat4', value: null},
+    'uGates': { type: 'mat4', value: null},
     'uBubbles': { type: 'vec4', value: null},
 
     //'tDiffuse': { type: 't', value: null },
@@ -67,6 +69,10 @@ tuniform.iChannel1.value.wrapS = tuniform.iChannel1.value.wrapT = THREE.RepeatWr
 tuniform.iResolution.value.set(window.innerWidth, window.innerHeight);
 
 const tuniformR = {
+    'fanCount': { type: 'int', value: 0},
+    'gateCount': { type: 'int', value: 0},
+    'uFans': { type: 'mat4', value: null},
+    'uGates': { type: 'mat4', value: null},
     'uBubbles': { type: 'vec4', value: null},
     //'tDiffuse': { type: 't', value: null },
     'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
@@ -87,6 +93,10 @@ tuniformR.iChannel1.value.wrapS = tuniformR.iChannel1.value.wrapT = THREE.Repeat
 //tuniformR.iResolution.value.set(window.innerWidth, window.innerHeight);
 
 const tuniformL = {
+    'fanCount': { type: 'int', value: 0},
+    'gateCount': { type: 'int', value: 0},
+    'uFans': { type: 'mat4', value: null},
+    'uGates': { type: 'mat4', value: null},
     'uBubbles': { type: 'vec4', value: null},
     //'tDiffuse': { type: 't', value: null },
     'uFront':   { type: 'v3', value: new THREE.Vector3(0.0, 0.0, -1.0) },
@@ -123,7 +133,8 @@ const bubbles = [];
 for(let j = 0; j<16; j++){
     bubbles.push(Math.random()*2-1,Math.random()*2-1,Math.random()*2-1,Math.random()*0.2);
 }
-let fans = [16*16];
+let fanMs = [16*16];
+let gateMs = [16*16];
 /*
 let i = 0;
 let cam = camera;
@@ -328,9 +339,9 @@ function render(time) {
 
     
     for(let j =0; j< gates.length; j++){
-        let fan0 =gates[j].matrixWorld.invert();
+        let gate0 =gates[j].matrixWorld.invert();
         for(let i = 0; i<16; i++){
-            fans[16*j+i] = fan0.elements[i];
+            gateMs[16*j+i] = gate0.elements[i];
         }
     }
     controls.update(0.01)
@@ -419,8 +430,10 @@ function render(time) {
         tuniform.iTime.value = time/1000;
         tuniform.iResolution.value=new Vector2( 1., window.innerHeight/window.innerWidth);
         tuniform.uBubbles.value = bubbles;
-        tuniform.uFans.value = fans;
-        tuniform.fanCount.value = gates.length;
+        tuniform.uFans.value = fanMs;
+        tuniform.uGates.value = gateMs;
+        tuniform.gateCount.value = gates.length;
+        tuniform.fanCount.value = fans.length;
         //dirUp.cross(new THREE.Vector3(0,1,0));
         if(dirUp.y <0.9){
             //camera.rotateOnAxis((dirUp.cross(new THREE.Vector3(0,1,0))).normalize(),0.01);

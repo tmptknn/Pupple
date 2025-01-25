@@ -7,7 +7,9 @@ uniform vec3 uPos;
 uniform vec2 iResolution;
 uniform vec4[16] uBubbles;
 uniform mat4[16] uFans;
+uniform mat4[16] uGates;
 uniform int  fanCount;
+uniform int gateCount;
 //uniform vec2 uAngle;
 //uniform sampler2D tDiffuse;
 uniform sampler2D iChannel0;
@@ -39,6 +41,26 @@ float sdTorus( vec3 p, vec2 t )
 {
   vec2 q = vec2(length(p.xy)-t.x,p.z);
   return length(q)-t.y;
+}
+
+float sdBox( vec3 p, vec3 b )
+{
+  vec3 q = abs(p) - b;
+  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
+
+float sdPropeller( vec3 p, vec2 t )
+{
+  return min(sdBox(mat3(sin(iTime), cos(iTime), 0,
+                    -cos(iTime), sin(iTime),0,
+                    0,0,1)*p, vec3(0.05, 0.4, 0.01)),sdBox(mat3(sin(iTime), cos(iTime), 0,
+                    -cos(iTime), sin(iTime),0,
+                    0,0,1)*p, vec3(0.4, 0.05, 0.01)));
+}
+
+float sdFan( vec3 p, vec2 t)
+{
+  return min(sdTorus(p, t), sdPropeller(p, t));
 }
 
 float sdPlane( vec3 p, vec3 n, float h )
@@ -99,31 +121,45 @@ vec4 bubbleColor(in vec3 ro, in vec3 rd){
     return texture2D(iChannel1, flexTime()*0.005+0.03*(rd.zx+rd.yz+rd.yx));
 }
 
-float fans(in vec3 p){
-    mat4 fan = uFans[0];
-    //fan.xyz*=-1.;
-    //fan.xyz+=p;
+float gates(in vec3 p){
+
     float torus =10000000.; //sdTorus((fan*vec4(p,1.)).xyz, vec2(0.50, 0.05));
     for(int i=0; i<16; i++){
-        if(fanCount<=i){
+        if(gateCount<=i){
             break;
         }
-        fan = uFans[i];
-        //fan.xyz*=-1.;
-        //fan.xyz+=p;
-        torus=min(torus, sdTorus((fan*vec4(p,1.)).xyz, vec2(0.50, 0.05)));
+        mat4 gate = uGates[i];
+        torus=min(torus, sdTorus((gate*vec4(p,1.)).xyz, vec2(0.50, 0.05)));
     }
 
     return torus;
 }
 
+float fans(in vec3 p){
+
+    float value =10000000.; //sdTorus((fan*vec4(p,1.)).xyz, vec2(0.50, 0.05));
+    for(int i=0; i<16; i++){
+        if(fanCount<=i){
+            break;
+        }
+        mat4 fan = uFans[i];
+        value=min(value, sdFan((fan*vec4(p,1.)).xyz, vec2(0.50, 0.05)));
+    }
+
+    return value;
+}
+
 vec2 map_the_world(in vec3 p)
 {
     
-    float fan_0 = fans(p);
+    float gate_0 = gates(p);
     float rain_0= rain(p);
+    float fan_0 = fans(p);
+    if(gate_0 <rain_0 && gate_0 < fan_0){
+        return vec2(4,gate_0);
+    }
     if(fan_0 <rain_0){
-        return vec2(4,fan_0);
+        return vec2(3,fan_0);
     }
     return vec2(2,rain_0);
 }
@@ -187,10 +223,10 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
                 ro=ro+rd*total_distance_traveled;
                 rd = (1./1.4)*(cross(normal,cross(-normal,rd))-normal*sqrt(1.-pow(1./1.4,2.0)*dot(cross(normal,rd),cross(normal,rd))));
             }
-            if(distance_to_closest.x==4.0 ){ // draw collision shape
+            if(distance_to_closest.x==4.0 || distance_to_closest.x == 3.0){ // draw collision shape
                 vec3 ambientColor = vec3(0.0, 0.0, 0.0);
-            vec3 diffuseColor = vec3(0.118, 0.11, 0.875);
-            vec3 specularColor = vec3(1.0, 1.0, 1.0);
+            vec3 diffuseColor = distance_to_closest.x ==4.?vec3(0.118, 0.11, 0.875):vec3( 0.875,0.118, 0.11);
+            vec3 specularColor = vec3(0.8, 0.8, 0.8);
             float specular = 0.0;
             const float shininess = 30.0;
             float lambertian = max(dot(normal, light_position), 0.0);
