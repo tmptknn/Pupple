@@ -205,14 +205,26 @@ plane.layers.disable(2);
 plane.layers.enable(0);
 camera.add(plane);
 
-
-const gates = [];
+function addGate(x, y, z, gates)
+{
 const geometry_torus = new THREE.TorusGeometry( 0.5, 0.05, 16, 100 ); 
 const material_torus = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
 const torus = new THREE.Mesh( geometry_torus, material_torus );
+    torus.position.set(x,y,z);
 gates.push(torus);
-torus.position.set(0,0,0);
-scene.add( torus );
+}
+
+function addToScene(gameObject)
+{
+    scene.add(gameObject);
+}
+
+const gates = [];
+addGate(0,0,-1, gates);
+addGate(0,0,-2, gates);
+addGate(0,0,-3, gates);
+
+gates.forEach(addToScene);
 
 const VRCamera = renderer.xr.getCamera();
 //console.log(VRCamera);
