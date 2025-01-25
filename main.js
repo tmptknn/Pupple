@@ -10,7 +10,7 @@ import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 //import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 //import {BubbleShader} from './src/bubbleShader.js';
 import { Vector2 } from 'three';
-//import { atan2, cross, rotate } from 'three/tsl';
+import { atan2, cross, rotate } from 'three/tsl';
 // Make a new scene
 let scene = new THREE.Scene();
 // Set background color of the scene to gray
@@ -209,12 +209,13 @@ plane.layers.enable(0);
 //plane.layers.disable(0);
 camera.add(plane);
 
-function addGate(x, y, z, gates)
+function addGate(x, y, z,gates, rotationY=0)
 {
 const geometry_torus = new THREE.TorusGeometry( 0.5, 0.05, 16, 100 ); 
 const material_torus = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
 const torus = new THREE.Mesh( geometry_torus, material_torus );
     torus.position.set(x,y,z);
+    torus.rotation.set(0,rotationY,0);
 gates.push(torus);
 
 }
@@ -228,6 +229,8 @@ const gates = [];
 addGate(0,0,-1, gates);
 addGate(0,0,-2, gates);
 addGate(0,0,-3, gates);
+addGate(0,0,-4, gates, Math.PI/5);
+
 
 gates.forEach(addToScene);
 
@@ -410,6 +413,7 @@ function render(time) {
         tuniform.uFov.value = camera.fov
         tuniform.uFront.value = dirFront;
         tuniform.uUp.value = dirUp;
+        
         tuniform.uLeft.value = dirLeft;
         tuniform.uPos.value = camera.position;
         tuniform.iTime.value = time/1000;
@@ -417,6 +421,11 @@ function render(time) {
         tuniform.uBubbles.value = bubbles;
         tuniform.uFans.value = fans;
         tuniform.fanCount.value = gates.length;
+        //dirUp.cross(new THREE.Vector3(0,1,0));
+        if(dirUp.y <0.9){
+            //camera.rotateOnAxis((dirUp.cross(new THREE.Vector3(0,1,0))).normalize(),0.01);
+            //camera.rotateOnWorldAxis((dirUp.cross(new THREE.Vector3(0,1,0))).normalize(),0.01);
+        }
     }
 /*
         bubblePass.uniforms.uFov.value = camera.fov/2.0;
