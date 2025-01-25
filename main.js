@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-//import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
+//import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 //import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 //import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 //import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
@@ -31,7 +31,7 @@ let bubble = new THREE.Mesh(
     new THREE.SphereGeometry(1.0, 32, 32),
     new THREE.MeshLambertMaterial({color:'#CCCCCC', transparent: true, opacity: 0.5})
 );
-const tausta = new THREE.TextureLoader().load( 'taustaquarter.png');
+const tausta = new THREE.TextureLoader().load( 'tausta.jpg');
 const randomnoise = new THREE.TextureLoader().load( 'randomnoisequarter.png' );
 const equirectangular = tausta;
 equirectangular.mapping = THREE.EquirectangularReflectionMapping;
@@ -256,14 +256,14 @@ document.body.appendChild(VRButton.createButton(renderer));
 //    import { ARButton } from 'https://unpkg.com/three/examples/jsm/webxr/ARButton.js';
 // then create the button
 //  document.body.appendChild(ARButton.createButton(renderer));
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.autoRotate = true;
-/*let controls = new FlyControls( camera, renderer.domElement );
-controls.movementSpeed = 100;
-controls.rollSpeed = Math.PI / 24;
+//const controls = new OrbitControls(camera, renderer.domElement);
+//controls.autoRotate = true;
+let controls = new FlyControls( camera, renderer.domElement );
+controls.movementSpeed = 0.5;
+controls.rollSpeed = Math.PI / 3;
 controls.autoForward = false;
 controls.dragToLook = true;
-*/
+
 //const composer = new EffectComposer( renderer );
 // Handle browser resize
 //const renderPass = new RenderPass( scene, camera );
@@ -284,6 +284,7 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+
 }
 
 let wind = [0,0];
@@ -297,6 +298,7 @@ function render(time) {
         bubbles[4*i+1] +=(Math.random()-0.5)*0.001;
         bubbles[4*i+2] +=(Math.random()-0.5)*0.001+wind[1];
     }
+    controls.update(0.01)
     //}
     if(renderer.xr.isPresenting){ 
         //for(let i=0; i<camera.cameras.length; i++){
@@ -328,7 +330,7 @@ function render(time) {
     // Draw everything
     //composer.
     //tuniform.iTime.value = time/1000;
-    //controls.update(0.01)
+    
         
         let dirFrontR = new THREE.Vector3(0,0,1);
         let dirUpR = new THREE.Vector3(0,1,0);
