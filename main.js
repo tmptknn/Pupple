@@ -4,13 +4,13 @@ import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 //import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 //import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import {BubbleShader} from './src/bubbleShader.js';
+//import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+//import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
+//import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+//import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+//import {BubbleShader} from './src/bubbleShader.js';
 import { Vector2 } from 'three';
-import { atan2, cross, rotate } from 'three/tsl';
+//import { atan2, cross, rotate } from 'three/tsl';
 // Make a new scene
 let scene = new THREE.Scene();
 // Set background color of the scene to gray
@@ -31,7 +31,7 @@ let bubble = new THREE.Mesh(
     new THREE.SphereGeometry(1.0, 32, 32),
     new THREE.MeshLambertMaterial({color:'#CCCCCC', transparent: true, opacity: 0.5})
 );
-const tausta = new THREE.TextureLoader().load( 'taustahalf.jpg');
+const tausta = new THREE.TextureLoader().load( 'taustahalf.png');
 const randomnoise = new THREE.TextureLoader().load( 'randomnoisehalf.png' );
 const equirectangular = tausta;
 equirectangular.mapping = THREE.EquirectangularReflectionMapping;
