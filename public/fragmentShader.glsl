@@ -10,6 +10,7 @@ uniform mat4[16] uFans;
 uniform mat4[16] uGates;
 uniform int  fanCount;
 uniform int gateCount;
+uniform int bubbleCount;
 //uniform vec2 uAngle;
 //uniform sampler2D tDiffuse;
 uniform sampler2D iChannel0;
@@ -92,6 +93,9 @@ float rain( vec3 p){
     drop.xyz+=p;
     float m=max(-(length(drop.xyz)-(drop.w-0.01)),length(drop.xyz)-(drop.w));
     for(int i=1; i<16; i++){
+        if(bubbleCount<=i){
+            break;
+        }
         drop = uBubbles[i];
         drop.xyz*=-1.;
         drop.xyz+=p;

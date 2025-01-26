@@ -9,7 +9,7 @@ import { FlyControls } from "three/examples/jsm/controls/FlyControls";
 //import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 //import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 //import {BubbleShader} from './src/bubbleShader.js';
-import { Vector2 } from "three";
+import { Vector2, Vector3 } from "three";
 import { atan2, cross, rotate } from "three/tsl";
 // Make a new scene
 let scene = new THREE.Scene();
@@ -45,6 +45,7 @@ equirectangular.anisotropy = 16;
 scene.background = equirectangular;
 
 const tuniform = {
+  bubbleCount: { type: "int", value: 0 },
   fanCount: { type: "int", value: 0 },
   gateCount: { type: "int", value: 0 },
   uFans: { type: "mat4", value: null },
@@ -131,15 +132,9 @@ async function init() {
 }
 
 await init();
-
-const bubbles = [];
+let bubbles = [];
 for (let j = 0; j < 16; j++) {
-  bubbles.push(
-    Math.random() * 2 - 1,
-    Math.random() * 2 - 1,
-    Math.random() * 2 - 1,
-    Math.random() * 0.2
-  );
+  bubbles.push(0, 0, 0, 0);
 }
 let fanMs = [];
 let gateMs = [];
@@ -232,12 +227,12 @@ const plane = new THREE.Mesh(geometry, material);
 plane.position.set(0, 0, -camera.near);
 plane.layers.disable(1);
 plane.layers.disable(2);
-//plane.layers.enable(0);
-plane.layers.disable(0);
+plane.layers.enable(0);
+//plane.layers.disable(0);
 camera.add(plane);
 
-function addBubble(x, y, z) {
-  const bubble_geometry = new THREE.SphereGeometry(0.1, 32, 32);
+function addBubble(x, y, z, soapBubbles, radius = 0.1) {
+  const bubble_geometry = new THREE.SphereGeometry(radius, 32, 32);
   const bubble_material = new THREE.MeshLambertMaterial({
     color: "#CCCCCC",
     transparent: true,
@@ -262,7 +257,15 @@ function addToScene(gameObject) {
 }
 
 const soapBubbles = [];
-addBubble(0, 0, -1, soapBubbles);
+for (let i = 0; i < 16; i++) {
+  addBubble(
+    (Math.random() - 0.5) * 3,
+    (Math.random() - 0.5) * 2,
+    (Math.random() - 0.5) * 3,
+    soapBubbles,
+    (Math.random() - 0.5) * 0.2 + 0.15
+  );
+}
 soapBubbles.forEach(addToScene);
 
 const gates = [];
@@ -365,11 +368,21 @@ function render(time) {
   wind[0] += (Math.random() - 0.5) * 0.0001;
   wind[1] += (Math.random() - 0.5) * 0.0001;
   for (let i = 0; i < 16; i++) {
-    bubbles[4 * i + 0] += (Math.random() - 0.5) * 0.001 + wind[0];
-    bubbles[4 * i + 1] += (Math.random() - 0.5) * 0.001;
-    bubbles[4 * i + 2] += (Math.random() - 0.5) * 0.001 + wind[1];
+    soapBubbles[i].position.add(
+      new Vector3(
+        (Math.random() - 0.5) * 0.001 + wind[0],
+        (Math.random() - 0.5) * 0.001,
+        (Math.random() - 0.5) * 0.001 + wind[1]
+      )
+    );
   }
 
+  for (let j = 0; j < soapBubbles.length; j++) {
+    bubbles[4 * j + 0] = soapBubbles[j].position.x;
+    bubbles[4 * j + 1] = soapBubbles[j].position.y;
+    bubbles[4 * j + 2] = soapBubbles[j].position.z;
+    bubbles[4 * j + 3] = soapBubbles[j].geometry.parameters.radius;
+  }
   for (let j = 0; j < gates.length; j++) {
     let gate0 = gates[j].matrixWorld.invert();
     for (let i = 0; i < 16; i++) {
@@ -474,6 +487,7 @@ function render(time) {
     tuniform.uFans.value = fanMs;
     tuniform.uGates.value = gateMs;
     tuniform.gateCount.value = gates.length;
+    tuniform.bubbleCount.value = soapBubbles.length;
     //tuniform.fanCount.value = fans.length;
     //dirUp.cross(new THREE.Vector3(0,1,0));
     if (dirUp.y < 0.9) {
