@@ -1,4 +1,5 @@
 import { Vector2, Vector3 } from "three";
+import { Matrix3 } from "three/webgpu";
 
 function doesSphereCollideWithTorus(
   spherePosition,
@@ -6,9 +7,9 @@ function doesSphereCollideWithTorus(
   torusRadius,
   torusInversionMatrix
 ) {
-  let invertedSpherePosition = spherePosition
-    .clone()
-    .applyMatrix4(torusInversionMatrix);
+  //new Vector3().;
+  let inversion = new Matrix3().setFromMatrix4(torusInversionMatrix);
+  let invertedSpherePosition = spherePosition.clone().applyMatrix3(inversion);
   let q = new Vector2(
     new Vector2(invertedSpherePosition.x, invertedSpherePosition.y).length() -
       torusRadius.x,
@@ -44,14 +45,14 @@ float sdCone( vec3 p, vec2 c, float h )
 */
 function doesConeCollideWithSphere(
   sphere,
+  cone /*
   coneAngle,
-  coneHeight,
+  coneHeight,*/,
   invertedConeMatrix
 ) {
-  let invertedSpherePosition = sphere.position
-    .clone()
-    .applyMatrix4(invertedConeMatrix);
-  let q = new Vector2((coneHeight * coneAngle.x) / coneAngle.y, -coneHeight);
+  let inversion = new Matrix3().setFromMatrix4(invertedConeMatrix);
+  let invertedSpherePosition = sphere.position.clone().applyMatrix3(inversion);
+  let q = cone; //new Vector2((coneHeight * coneAngle.x) / coneAngle.y, -coneHeight);
   let w = new Vector2(
     new Vector2(invertedSpherePosition.x, invertedSpherePosition.y).length(),
     invertedSpherePosition.z
@@ -101,13 +102,13 @@ function collideSpheresWithSpheres(spheres) {
 
 function collideSpheresWithCones(spheres, cones) {
   let collisions = [];
+  let angle = Math.PI / 8;
   for (let i = 0; i < spheres.length; i++) {
     for (let j = 0; j < cones.length; j++) {
       if (
         doesConeCollideWithSphere(
           spheres[i],
-          new Vector2(3, 1),
-          1.0,
+          new Vector3(0.5, 0, 2),
           cones[j].matrixWorld.invert()
         )
       ) {
