@@ -292,6 +292,7 @@ gates.forEach(addToScene);
 
 const fans = [];
 addFan(0, 1, -1.5, fans, Math.PI / 4);
+addFan(0, 0, 0, fans);
 fans.forEach(addToScene);
 
 const VRCamera = renderer.xr.getCamera();
@@ -502,7 +503,7 @@ function render(time) {
           .multiplyScalar(strength * 0.1)
       );
       */
-      sphere.userData.speed.add(dirFront.multiplyScalar(0.001));
+      sphere.userData.speed.add(dirFront.multiplyScalar(strength * 0.01));
     }
   }
 
@@ -516,7 +517,7 @@ function render(time) {
       let distance = diff.length();
       let strength = Math.max(0, 1.0 - distance);
       let dirFront = new THREE.Vector3(0, 0, 1);
-      dirFront = fan.getWorldDirection(dirFront);
+      dirFront = dirFront.applyQuaternion(fan.quaternion);
       /*sphere.userData.speed.add(
         sphere.position
           .clone()
@@ -525,7 +526,7 @@ function render(time) {
           .multiplyScalar(strength * 0.1)
       );
       */
-      sphere.userData.speed.add(dirFront.multiplyScalar(0.01));
+      sphere.userData.speed.add(dirFront.multiplyScalar(strength * 0.01));
     }
   }
 
