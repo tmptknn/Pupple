@@ -127,7 +127,7 @@ function collideSpheresWithSpheres(spheres) {
   return collisions;
 }
 
-function collideSpheresWithConesNotWorking(spheres, cones) {
+function collideSpheresWithCones(spheres, cones) {
   let collisions = [];
   let angle = Math.PI / 8;
   for (let i = 0; i < spheres.length; i++) {
@@ -146,7 +146,7 @@ function collideSpheresWithConesNotWorking(spheres, cones) {
   return collisions;
 }
 
-function collideSpheresWithCones(spheres, cones) {
+function collideSpheresWithConesNew(spheres, cones) {
   let collisions = [];
   for (let i = 0; i < spheres.length; i++) {
     for (let j = 0; j < cones.length; j++) {

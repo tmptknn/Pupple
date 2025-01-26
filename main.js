@@ -503,7 +503,7 @@ function render(time) {
           .multiplyScalar(strength * 0.1)
       );
       */
-      sphere.userData.speed.add(dirFront.multiplyScalar(0.1));
+      sphere.userData.speed.add(dirFront.multiplyScalar(strength * 0.1));
     }
   }
 
