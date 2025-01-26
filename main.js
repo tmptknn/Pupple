@@ -644,18 +644,29 @@ function render(time) {
   //composer.render();
 }
 
-// create an AudioListener and add it to the camera
-const listener = new THREE.AudioListener();
-camera.add(listener);
+renderer.domElement.addEventListener("click", playMusic);
+var musicPlaying = false;
 
-// create a global audio source
-const sound = new THREE.Audio(listener);
+function playMusic() {
 
-// load a sound and set it as the Audio object's buffer
-const audioLoader = new THREE.AudioLoader();
-audioLoader.load("./music/calming_music.ogg", function (buffer) {
-  sound.setBuffer(buffer);
-  sound.setLoop(true);
-  sound.setVolume(0.5);
-  sound.play();
-});
+  if (musicPlaying)
+    return;
+
+  musicPlaying = true;
+
+  // create an AudioListener and add it to the camera
+  const listener = new THREE.AudioListener();
+  camera.add(listener);
+
+  // create a global audio source
+  const sound = new THREE.Audio(listener);
+
+  // load a sound and set it as the Audio object's buffer
+  const audioLoader = new THREE.AudioLoader();
+  audioLoader.load("./music/calming_music.ogg", function (buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(true);
+    sound.setVolume(0.5);
+    sound.play();
+  });
+}
