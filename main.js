@@ -401,11 +401,11 @@ function render(time) {
     soapBubbles[i].position.add(
       new Vector3(
         soapBubbles[i].userData.speed.x +
-          (Math.random() - 0.5) * 0.00001 +
+          (Math.random() - 0.5) * 0.0000001 +
           wind[0],
-        soapBubbles[i].userData.speed.y + (Math.random() - 0.5) * 0.0001,
+        soapBubbles[i].userData.speed.y + (Math.random() - 0.5) * 0.0000001,
         soapBubbles[i].userData.speed.z +
-          (Math.random() - 0.5) * 0.00001 +
+          (Math.random() - 0.5) * 0.00000001 +
           wind[1]
       )
     );

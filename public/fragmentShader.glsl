@@ -237,7 +237,7 @@ vec4 ray_march(in vec3 ro, in vec3 rd, in bool ignore_water)
                 rd = (1./1.4)*(cross(normal,cross(-normal,rd))-normal*sqrt(1.-pow(1./1.4,2.0)*dot(cross(normal,rd),cross(normal,rd))));
             }
             if(distance_to_closest.x==4.0 || distance_to_closest.x == 3.0){ // draw collision shape
-                vec3 ambientColor = vec3(0.0, 0.0, 0.0);
+                vec3 ambientColor = vec3(0.1, 0.1, 0.05);
             vec3 diffuseColor = distance_to_closest.x ==4.?vec3(0.118, 0.11, 0.875):vec3( 0.875,0.118, 0.11);
             vec3 specularColor = vec3(0.8, 0.8, 0.8);
             float specular = 0.0;
