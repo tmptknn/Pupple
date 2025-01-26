@@ -1,6 +1,33 @@
 import { Vector2, Vector3 } from "three";
 import { Matrix3 } from "three/webgpu";
 
+function closestPointOnSegment(p, a, b) {
+  let v = b.sub(a);
+  let u = a.sub(p);
+  let vu = v.x * u.x + v.y * u.y + v.z * u.z;
+  let vv = v.x * v.x + v.y * v.y + v.z * v.z;
+  let t = -vu / vv;
+  if (t >= 0 && t <= 1) {
+    return t;
+  }
+  let aa = u.x * u.x + u.y * u.y + u.x * u.x;
+  let bb =
+    (b.x - p.x) * (b.x - p.x) +
+    (b.y - p.y) * (b.y - p.y) +
+    (b.z - p.z) * (b.z - p.z);
+  if (aa < bb) {
+    return 0;
+  }
+  return 1;
+}
+
+function doesSphereCollideWithCylinder(sphere, a, b, radius) {
+  let t = closestPointOnSegment(sphere.position, a, b);
+  let point = a.add(b.sub(a).multiplyScalar(t));
+  let distance = point.distanceTo(sphere.position);
+  return distance <= radius + sphere.geometry.parameters.radius;
+}
+
 function doesSphereCollideWithTorus(
   spherePosition,
   sphereRadius,
@@ -100,7 +127,7 @@ function collideSpheresWithSpheres(spheres) {
   return collisions;
 }
 
-function collideSpheresWithCones(spheres, cones) {
+function collideSpheresWithConesNotWorking(spheres, cones) {
   let collisions = [];
   let angle = Math.PI / 8;
   for (let i = 0; i < spheres.length; i++) {
@@ -108,10 +135,28 @@ function collideSpheresWithCones(spheres, cones) {
       if (
         doesConeCollideWithSphere(
           spheres[i],
-          new Vector3(0.5, 0, 2),
+          new Vector3(0.5, 0, 1),
           cones[j].matrixWorld.invert()
         )
       ) {
+        collisions.push({ sphere: i, cone: j });
+      }
+    }
+  }
+  return collisions;
+}
+
+function collideSpheresWithCones(spheres, cones) {
+  let collisions = [];
+  for (let i = 0; i < spheres.length; i++) {
+    for (let j = 0; j < cones.length; j++) {
+      let pointa = cones[j].position
+        .clone()
+        .add(new Vector3(0, 0, 0.25).applyQuaternion(cones[j].quaternion));
+      let pointb = cones[j].position
+        .clone()
+        .add(new Vector3(0, 0, 1.25).applyQuaternion(cones[j].quaternion));
+      if (doesSphereCollideWithCylinder(spheres[i], pointa, pointb, 0.5)) {
         collisions.push({ sphere: i, cone: j });
       }
     }

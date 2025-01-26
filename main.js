@@ -487,12 +487,12 @@ function render(time) {
 
   let blown = collideSpheresWithCones(soapBubbles, [camera]);
   if (blown.length > 0) {
-    //console.log("Blown:", blown);
+    console.log("Blown:", blown);
     for (let blow of blown) {
       let sphere = soapBubbles[blow.sphere];
       let diff = sphere.position.clone().sub(camera.position);
       let distance = diff.length();
-      let strength = Math.max(0, 1.0 - distance);
+      let strength = Math.max(0, 2.0 - distance);
       let dirFront = new THREE.Vector3(0, 0, 1);
       dirFront = camera.getWorldDirection(dirFront);
       /*sphere.userData.speed.add(
@@ -503,7 +503,7 @@ function render(time) {
           .multiplyScalar(strength * 0.1)
       );
       */
-      sphere.userData.speed.add(dirFront.multiplyScalar(strength * 0.01));
+      sphere.userData.speed.add(dirFront.multiplyScalar(0.1));
     }
   }
 
@@ -515,7 +515,7 @@ function render(time) {
       let fan = fans[blow.cone];
       let diff = sphere.position.clone().sub(fan.position);
       let distance = diff.length();
-      let strength = Math.max(0, 1.0 - distance);
+      let strength = Math.max(0, 3.0 - distance);
       let dirFront = new THREE.Vector3(0, 0, 1);
       dirFront = dirFront.applyQuaternion(fan.quaternion);
       /*sphere.userData.speed.add(
