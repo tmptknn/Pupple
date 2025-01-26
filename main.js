@@ -11,7 +11,11 @@ import { FlyControls } from "three/examples/jsm/controls/FlyControls";
 //import {BubbleShader} from './src/bubbleShader.js';
 import { Vector2, Vector3 } from "three";
 import { atan2, cross, rotate } from "three/tsl";
-import { collideSpheresWithToruses } from "./collider";
+import {
+  collideSpheresWithToruses,
+  collideSpheresWithSpheres,
+  collideSpheresWithCones,
+} from "./collider";
 // Make a new scene
 let scene = new THREE.Scene();
 // Set background color of the scene to gray
@@ -24,9 +28,8 @@ let camera = new THREE.PerspectiveCamera(
   0.01,
   100
 );
-camera.position.set(0, 0, 0.0001);
+camera.position.set(0, 0, 3);
 scene.add(camera);
-let fans = [];
 // Add some lights
 var light = new THREE.DirectionalLight(0xffffff, 0.5);
 light.position.set(1, 1, 1).normalize();
@@ -241,6 +244,7 @@ function addBubble(x, y, z, soapBubbles, radius = 0.1) {
   });
   const bubble = new THREE.Mesh(bubble_geometry, bubble_material);
   bubble.position.set(x, y, z);
+  bubble.userData = { speed: new Vector3(0, 0, 0) };
   soapBubbles.push(bubble);
 }
 
@@ -251,6 +255,15 @@ function addGate(x, y, z, gates, rotationY = 0) {
   torus.position.set(x, y, z);
   torus.rotateY(rotationY);
   gates.push(torus);
+}
+
+function addFan(x, y, z, fans, rotationY = 0) {
+  const geometry_torus = new THREE.TorusGeometry(0.5, 0.05, 16, 100);
+  const material_torus = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+  const torus = new THREE.Mesh(geometry_torus, material_torus);
+  torus.position.set(x, y, z);
+  torus.rotateY(rotationY);
+  fans.push(torus);
 }
 
 function addToScene(gameObject) {
@@ -264,7 +277,7 @@ for (let i = 0; i < 16; i++) {
     (Math.random() - 0.5) * 2,
     (Math.random() - 0.5) * 3,
     soapBubbles,
-    (Math.random() - 0.5) * 0.2 + 0.15
+    Math.random() * 0.1 + 0.15
   );
 }
 soapBubbles.forEach(addToScene);
@@ -276,6 +289,10 @@ addGate(-1, 1, -5, gates, Math.PI / 5);
 addGate(0, 0.5, -8, gates);
 
 gates.forEach(addToScene);
+
+const fans = [];
+addFan(0, 1, -1.5, fans, Math.PI / 4);
+fans.forEach(addToScene);
 
 const VRCamera = renderer.xr.getCamera();
 //console.log(VRCamera);
@@ -365,15 +382,30 @@ function onWindowResize() {
 let wind = [0, 0];
 
 function render(time) {
+  fans[0].rotateY(0.01);
   //if(renderer.xr.isPresenting && tuniforms.length <2 ){
-  wind[0] += (Math.random() - 0.5) * 0.002;
-  wind[1] += (Math.random() - 0.5) * 0.002;
+  wind[0] += (Math.random() - 0.5) * 0.000001;
+  wind[1] += (Math.random() - 0.5) * 0.000001;
   for (let i = 0; i < soapBubbles.length; i++) {
+    soapBubbles[i].userData.speed.add(new Vector3(wind[0], 0, wind[1]));
+    soapBubbles[i].userData.speed.multiplyScalar(0.94);
+    soapBubbles[i].userData.speed.add(
+      new Vector3(
+        (Math.random() - 0.5) * 0.001,
+        (Math.random() - 0.5) * 0.001,
+        (Math.random() - 0.5) * 0.001
+      )
+    );
+
     soapBubbles[i].position.add(
       new Vector3(
-        (Math.random() - 0.5) * 0.0001 + wind[0],
-        (Math.random() - 0.5) * 0.0001,
-        (Math.random() - 0.5) * 0.0001 + wind[1]
+        soapBubbles[i].userData.speed.x +
+          (Math.random() - 0.5) * 0.00001 +
+          wind[0],
+        soapBubbles[i].userData.speed.y + (Math.random() - 0.5) * 0.0001,
+        soapBubbles[i].userData.speed.z +
+          (Math.random() - 0.5) * 0.00001 +
+          wind[1]
       )
     );
   }
@@ -406,6 +438,97 @@ function render(time) {
       soapBubbles.splice(collision.sphere, 1);
     }
   }
+
+  let sphereCollisions = collideSpheresWithSpheres(soapBubbles);
+  if (sphereCollisions.length > 0) {
+    //console.log("Sphere collisions:", sphereCollisions);
+    for (let collision of sphereCollisions) {
+      let bubble1 = soapBubbles[collision.sphere1];
+      let bubble2 = soapBubbles[collision.sphere2];
+      let bubblea = bubble2;
+      let bubbleb = bubble1;
+      if (
+        bubble1.geometry.parameters.radius > bubble2.geometry.parameters.radius
+      ) {
+        bubblea = bubble1;
+        bubbleb = bubble2;
+      }
+      let massa = 4 * Math.PI * Math.pow(bubblea.geometry.parameters.radius, 2);
+      let massb = 4 * Math.PI * Math.pow(bubbleb.geometry.parameters.radius, 2);
+      let ra = bubblea.geometry.parameters.radius;
+      let rb = bubbleb.geometry.parameters.radius;
+      let desiredDistance = Math.sqrt(
+        ra * ra + rb * rb - 2 * ra * rb * Math.cos(Math.PI / 3)
+      );
+      let distancce = bubblea.position.distanceTo(bubbleb.position);
+      let change = (desiredDistance - distancce) * 0.15;
+      let changea = (change * massb) / (massa + massb);
+      let changeb = (change * massa) / (massa + massb);
+      let direction = bubblea.position
+        .clone()
+        .sub(bubbleb.position)
+        .normalize();
+      bubblea.position.add(direction.multiplyScalar(changea));
+      bubbleb.position.add(direction.multiplyScalar(-changeb));
+      bubblea.userData.speed.add(direction.multiplyScalar(changea * 0.1));
+      bubbleb.userData.speed.add(direction.multiplyScalar(-changeb * 0.1));
+      /*
+      let speed = bubblea.userData.speed
+        .clone()
+        .multiply(massa)
+        .add(bubbleb.userData.speed.clone().multiply(massb))
+        .multiply(1 / (massa + massb));
+      bubblea.userData.speed = speed;
+      bubbleb.userData.speed = speed;
+      */
+    }
+  }
+
+  let blown = collideSpheresWithCones(soapBubbles, [camera]);
+  if (blown.length > 0) {
+    //console.log("Blown:", blown);
+    for (let blow of blown) {
+      let sphere = soapBubbles[blow.sphere];
+      let diff = sphere.position.clone().sub(camera.position);
+      let distance = diff.length();
+      let strength = Math.max(0, 1.0 - distance);
+      let dirFront = new THREE.Vector3(0, 0, 1);
+      dirFront = camera.getWorldDirection(dirFront);
+      /*sphere.userData.speed.add(
+        sphere.position
+          .clone()
+          .sub(camera.position)
+          .normalize()
+          .multiplyScalar(strength * 0.1)
+      );
+      */
+      sphere.userData.speed.add(dirFront.multiplyScalar(0.001));
+    }
+  }
+
+  let fanBlown = collideSpheresWithCones(soapBubbles, fans);
+  if (fanBlown.length > 0) {
+    //console.log("Blown:", blown);
+    for (let blow of blown) {
+      let sphere = soapBubbles[blow.sphere];
+      let fan = fans[blow.cone];
+      let diff = sphere.position.clone().sub(fan.position);
+      let distance = diff.length();
+      let strength = Math.max(0, 1.0 - distance);
+      let dirFront = new THREE.Vector3(0, 0, 1);
+      dirFront = fan.getWorldDirection(dirFront);
+      /*sphere.userData.speed.add(
+        sphere.position
+          .clone()
+          .sub(fan.position)
+          .normalize()
+          .multiplyScalar(strength * 0.1)
+      );
+      */
+      sphere.userData.speed.add(dirFront.multiplyScalar(0.01));
+    }
+  }
+
   //}
   if (renderer.xr.isPresenting) {
     //for(let i=0; i<camera.cameras.length; i++){
@@ -469,7 +592,7 @@ function render(time) {
     tuniformL.uLeft.value = dirLeftL;
     tuniformL.uPos.value = VRCamera.position
       .clone()
-      .add(dirLeftL.clone().multiply(0.063));
+      .add(dirLeftL.clone().multiplyScalar(0.063));
     tuniformL.iTime.value = time / 1000;
     tuniformL.iResolution.value = new Vector2(1, 1);
     tuniformL.uBubbles.value = bubbles;
@@ -497,6 +620,7 @@ function render(time) {
     tuniform.uFans.value = fanMs;
     tuniform.uGates.value = gateMs;
     tuniform.gateCount.value = gates.length;
+    tuniform.fanCount.value = fans.length;
     tuniform.bubbleCount.value = soapBubbles.length;
     //tuniform.fanCount.value = fans.length;
     //dirUp.cross(new THREE.Vector3(0,1,0));

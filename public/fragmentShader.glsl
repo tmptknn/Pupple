@@ -52,11 +52,12 @@ float sdBox( vec3 p, vec3 b )
 
 float sdPropeller( vec3 p, vec2 t )
 {
-  return min(sdBox(mat3(sin(iTime), cos(iTime), 0,
-                    -cos(iTime), sin(iTime),0,
-                    0,0,1)*p, vec3(0.05, 0.4, 0.01)),sdBox(mat3(sin(iTime), cos(iTime), 0,
-                    -cos(iTime), sin(iTime),0,
-                    0,0,1)*p, vec3(0.4, 0.05, 0.01)));
+
+    mat3 rot =mat3(sin(iTime*8.), cos(iTime*8.), 0,
+                    -cos(iTime*8.), sin(iTime*8.),0,
+                    0,0,1);
+    vec3 q = rot*p;
+  return min(sdBox(q, vec3(0.05, 0.4, 0.01)),sdBox(q, vec3(0.4, 0.05, 0.01)));
 }
 
 float sdFan( vec3 p, vec2 t)
