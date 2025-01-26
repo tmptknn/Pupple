@@ -11,6 +11,7 @@ import { FlyControls } from "three/examples/jsm/controls/FlyControls";
 //import {BubbleShader} from './src/bubbleShader.js';
 import { Vector2, Vector3 } from "three";
 import { atan2, cross, rotate } from "three/tsl";
+import { collideSpheresWithToruses } from "./collider";
 // Make a new scene
 let scene = new THREE.Scene();
 // Set background color of the scene to gray
@@ -256,7 +257,7 @@ function addToScene(gameObject) {
   scene.add(gameObject);
 }
 
-const soapBubbles = [];
+let soapBubbles = [];
 for (let i = 0; i < 16; i++) {
   addBubble(
     (Math.random() - 0.5) * 3,
@@ -365,14 +366,14 @@ let wind = [0, 0];
 
 function render(time) {
   //if(renderer.xr.isPresenting && tuniforms.length <2 ){
-  wind[0] += (Math.random() - 0.5) * 0.0001;
-  wind[1] += (Math.random() - 0.5) * 0.0001;
-  for (let i = 0; i < 16; i++) {
+  wind[0] += (Math.random() - 0.5) * 0.002;
+  wind[1] += (Math.random() - 0.5) * 0.002;
+  for (let i = 0; i < soapBubbles.length; i++) {
     soapBubbles[i].position.add(
       new Vector3(
-        (Math.random() - 0.5) * 0.001 + wind[0],
-        (Math.random() - 0.5) * 0.001,
-        (Math.random() - 0.5) * 0.001 + wind[1]
+        (Math.random() - 0.5) * 0.0001 + wind[0],
+        (Math.random() - 0.5) * 0.0001,
+        (Math.random() - 0.5) * 0.0001 + wind[1]
       )
     );
   }
@@ -396,6 +397,15 @@ function render(time) {
     }
   }
   controls.update(0.01);
+
+  let collisions = collideSpheresWithToruses(soapBubbles, gates);
+  if (collisions.length > 0) {
+    console.log("Collisions:", collisions);
+    for (let collision of collisions) {
+      scene.remove(soapBubbles[collision.sphere]);
+      soapBubbles.splice(collision.sphere, 1);
+    }
+  }
   //}
   if (renderer.xr.isPresenting) {
     //for(let i=0; i<camera.cameras.length; i++){
